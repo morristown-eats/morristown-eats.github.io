@@ -26,7 +26,7 @@ byob: false
 outdoor_seating: false
 
 good_for: ["date-night", "lunch", "cocktails", "after-work"]
-vibe: ["hotel-bar", "airy", "bright"]
+vibe: ["airy", "bright", "neighborhood-bar"]
 
 dishes:
   - name: "Focaccia with Whipped Ricotta"
@@ -55,9 +55,9 @@ owner_names: []
 awards_note: ""
 ---
 
-Floor-to-ceiling glass on Morris Street, looking out at the roundabout. Big room. Bar in the center. Open kitchen off to the side. 11am on a Friday and it's empty and quiet.
+Floor-to-ceiling glass on Morris Street, looking out at the roundabout. Big room. Bar in the center. Open kitchen off to the side. Street level of M Station — Sanofi is above. 11am on a Friday and it's quiet.
 
-We've been here three or four times now. It's a hotel restaurant that behaves like it doesn't have to be.
+We've been here three or four times now.
 
 The focaccia ($14) is whipped ricotta, market conserva, olive relish. Add the prosciutto ($8). The wings ($15) are smoked then fried — lime slaw, peanuts, chili fish sauce. The crab and jalapeño pasta ($33) uses housemade linguine. It's cooked right.
 

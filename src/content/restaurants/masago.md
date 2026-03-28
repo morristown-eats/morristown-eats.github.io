@@ -38,7 +38,7 @@ image: ""
 image_alt: ""
 awards: []
 
-one_liner: "Morristown's go-to BYOB sushi — reliable, local, and the answer to half the town's Friday night question."
+one_liner: "BYOB sushi. The Friday night default for half the town."
 visit_status: "pending"
 last_updated: "2026-03-27"
 published: true

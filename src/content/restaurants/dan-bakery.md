@@ -37,7 +37,7 @@ image: ""
 image_alt: ""
 awards: []
 
-one_liner: "Central Asian pastry tradition meets South Street — the Honey Cake alone justifies the detour."
+one_liner: "Central Asian pastry. The Honey Cake is why people line up."
 visit_status: "pending"
 last_updated: "2026-03-27"
 published: true

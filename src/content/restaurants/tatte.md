@@ -4,7 +4,7 @@ slug: "tatte"
 status: "active"
 
 cuisine: ["cafe", "bakery"]
-neighborhood: "south-street"
+neighborhood: "morris-street"
 price: "$$"
 ownership: "regional_chain"
 

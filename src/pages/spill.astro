@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Spill the Tea"
+  description="Tips, rumors, and developments from Morristown's restaurant scene. New openings, closures, construction, and things overheard."
+>
+  <style>
+    .spill-wrap {
+      max-width: 620px;
+      padding: 4rem 0 6rem;
+    }
+    .spill-header {
+      margin-bottom: 3rem;
+    }
+    .spill-header .label {
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+    .spill-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      line-height: 1.05;
+      margin-bottom: 1rem;
+    }
+    .spill-header .spill-sub {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.7;
+      color: var(--color-ink-muted);
+      max-width: 500px;
+    }
+    .spill-tip-box {
+      background: var(--color-ink);
+      color: var(--color-paper);
+      padding: 2rem 2.5rem;
+      margin-bottom: 3rem;
+      box-shadow: 4px 4px 0 var(--color-rust);
+    }
+    .spill-tip-box p {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin: 0 0 1rem;
+    }
+    .spill-tip-box p:last-child { margin-bottom: 0; }
+    .spill-tip-box a {
+      color: var(--color-mustard);
+      text-decoration: underline;
+    }
+    .spill-item {
+      border-bottom: 2px solid var(--color-paper-dark);
+      padding: 2rem 0;
+    }
+    .spill-item:first-of-type {
+      border-top: 2px solid var(--color-ink);
+    }
+    .spill-date {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-ink-muted);
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .spill-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: var(--color-rust);
+      color: var(--color-paper);
+      padding: 0.15rem 0.5rem;
+      display: inline-block;
+      margin-bottom: 0.75rem;
+    }
+    .spill-item h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      line-height: 1.2;
+      margin-bottom: 0.6rem;
+    }
+    .spill-item p {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--color-ink-muted);
+      margin: 0;
+    }
+    .spill-empty {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--color-ink-muted);
+      font-style: italic;
+      padding: 3rem 0;
+      border-top: 2px solid var(--color-ink);
+    }
+    @media (max-width: 640px) {
+      .spill-wrap { padding: 3rem 0 4rem; }
+      .spill-tip-box { padding: 1.5rem; }
+    }
+  </style>
+
+  <div class="container">
+    <div class="spill-wrap">
+
+      <div class="spill-header">
+        <span class="label">The Gossip Rag</span>
+        <h1>Spill the Tea.</h1>
+        <p class="spill-sub">
+          New openings. Closures. Construction. Liquor license transfers. Things overheard.
+          Unverified until stated otherwise.
+        </p>
+      </div>
+
+      <div class="spill-tip-box">
+        <p>
+          Got something? A new restaurant filing permits, a For Lease sign going up,
+          a chef switching kitchens, construction that doesn't add up —
+          <a href="mailto:tips@morristowneats.com">tips@morristowneats.com</a>.
+          Anonymous is fine.
+        </p>
+      </div>
+
+      <div class="spill-empty">
+        The kettle's on. First dispatches coming soon.
+      </div>
+
+    </div>
+  </div>
+
+</BaseLayout>

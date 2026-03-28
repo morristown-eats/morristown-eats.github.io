@@ -1,0 +1,195 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import neighborhoods from '../data/neighborhoods.json';
+
+const allRestaurants = await getCollection('restaurants', ({ data }) => data.published);
+const grouped = neighborhoods.map(n => ({
+  neighborhood: n,
+  restaurants: allRestaurants.filter(r => r.data.neighborhood === n.slug)
+    .sort((a, b) => a.data.name.localeCompare(b.data.name)),
+})).filter(g => g.restaurants.length > 0);
+---
+
+<BaseLayout
+  title="Map"
+  description="Where to eat in Morristown, NJ — organized by neighborhood."
+>
+  <style>
+    .map-wrap {
+      padding: 3rem 0 6rem;
+    }
+    .map-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .map-header .label {
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+    .map-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin-bottom: 0.75rem;
+    }
+    .map-header .map-sub {
+      font-family: var(--font-body);
+      color: var(--color-ink-muted);
+      font-size: var(--text-base);
+    }
+
+    /* Illustrated map container */
+    .map-illustration {
+      background: var(--color-paper-dark);
+      border: 3px solid var(--color-ink);
+      box-shadow: 6px 6px 0 var(--color-ink);
+      padding: 2rem;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .map-illustration::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+    .map-zone {
+      background: var(--color-paper);
+      border: 2px solid var(--color-ink);
+      padding: 1.25rem;
+      transform: rotate(var(--rot, 0deg));
+      transition: transform 0.2s ease;
+    }
+    .map-zone:hover {
+      transform: rotate(0deg) scale(1.02);
+      z-index: 2;
+    }
+    .map-zone:nth-child(1) { --rot: -0.5deg; }
+    .map-zone:nth-child(2) { --rot: 0.3deg; }
+    .map-zone:nth-child(3) { --rot: -0.7deg; }
+    .map-zone:nth-child(4) { --rot: 0.4deg; }
+    .map-zone:nth-child(5) { --rot: -0.3deg; }
+    .map-zone:nth-child(6) { --rot: 0.6deg; }
+    .map-zone-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--color-ink);
+      margin-bottom: 0.25rem;
+      line-height: 1.2;
+    }
+    .map-zone-count {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-ink-muted);
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    .map-zone-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .map-zone-list li {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      border-bottom: 1px dashed var(--color-border);
+      padding: 0.3rem 0;
+    }
+    .map-zone-list li:last-child {
+      border-bottom: none;
+    }
+    .map-zone-list a {
+      color: var(--color-ink);
+      text-decoration: none;
+    }
+    .map-zone-list a:hover {
+      color: var(--color-rust);
+    }
+    .map-zone-list .map-price {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--color-ink-muted);
+      margin-left: 0.25rem;
+    }
+    .map-zone-list .map-byob {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--color-green);
+      color: var(--color-paper);
+      padding: 0.05rem 0.3rem;
+      margin-left: 0.35rem;
+      vertical-align: middle;
+    }
+
+    /* Compass rose */
+    .map-compass {
+      position: absolute;
+      bottom: 1rem;
+      right: 1.5rem;
+      font-family: var(--font-display);
+      font-size: 2rem;
+      color: var(--color-rust);
+      opacity: 0.3;
+      z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+      .map-grid {
+        grid-template-columns: 1fr;
+      }
+      .map-zone { transform: rotate(0deg); }
+    }
+  </style>
+
+  <div class="container">
+    <div class="map-wrap">
+
+      <div class="map-header">
+        <span class="label">The Map</span>
+        <h1>Where everything is.</h1>
+        <p class="map-sub">Morristown, NJ — organized by neighborhood.</p>
+      </div>
+
+      <div class="map-illustration">
+        <div class="map-grid">
+          {grouped.map(g => (
+            <div class="map-zone">
+              <p class="map-zone-name">{g.neighborhood.label}</p>
+              <span class="map-zone-count">
+                {g.restaurants.length} {g.restaurants.length === 1 ? 'place' : 'places'}
+              </span>
+              <ul class="map-zone-list">
+                {g.restaurants.map(r => (
+                  <li>
+                    <a href={`/restaurants/${r.slug}`}>
+                      {r.data.name}
+                    </a>
+                    <span class="map-price">{r.data.price}</span>
+                    {r.data.byob && <span class="map-byob">BYOB</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <div class="map-compass">N</div>
+      </div>
+
+    </div>
+  </div>
+
+</BaseLayout>

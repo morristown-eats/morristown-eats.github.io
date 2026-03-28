@@ -4,7 +4,7 @@ slug: "the-morris-proper"
 status: "active"
 
 cuisine: ["new-american"]
-neighborhood: "south-street"
+neighborhood: "morris-street"
 price: "$$$"
 ownership: "independent"
 

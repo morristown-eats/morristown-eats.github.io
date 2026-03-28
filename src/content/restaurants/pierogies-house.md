@@ -38,7 +38,7 @@ image: ""
 image_alt: ""
 awards: []
 
-one_liner: "Evelina makes everything herself from her grandmother Julia's recipes — and it's the kind of place Bourdain would have walked into and stayed for an hour."
+one_liner: "Evelina makes everything herself. Her grandmother Julia's recipes."
 visit_status: "pending"
 last_updated: "2026-03-27"
 published: true

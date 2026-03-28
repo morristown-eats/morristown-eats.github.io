@@ -38,7 +38,7 @@ image: ""
 image_alt: ""
 awards: []
 
-one_liner: "South Street's answer to the date-night question — Greek-Mediterranean, BYOB, and a heated patio worth reserving in advance."
+one_liner: "Greek-Mediterranean. BYOB. Heated patio. Book ahead."
 visit_status: "pending"
 last_updated: "2026-03-27"
 published: true

@@ -37,7 +37,7 @@ image: ""
 image_alt: ""
 awards: []
 
-one_liner: "The chef Morristown's food scene doesn't talk about enough — El Salvadoran cooking with real range and a personal touch."
+one_liner: "El Salvadoran. Personal menu. Everything cooked to order."
 visit_status: "pending"
 last_updated: "2026-03-27"
 published: true

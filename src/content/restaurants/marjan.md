@@ -38,7 +38,7 @@ image: ""
 image_alt: ""
 awards: []
 
-one_liner: "Morristown's only Persian restaurant — and one of the most quietly excellent places to eat on Speedwell."
+one_liner: "Morristown's only Persian restaurant. Kebabs, stews, saffron rice."
 visit_status: "pending"
 last_updated: "2026-03-27"
 published: true

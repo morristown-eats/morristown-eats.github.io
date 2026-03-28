@@ -38,7 +38,7 @@ image: ""
 image_alt: ""
 awards: []
 
-one_liner: "75 years of morning service in Morristown — the kind of institution that holds a neighborhood together."
+one_liner: "Open since 1950. Same counter, same morning."
 visit_status: "pending"
 last_updated: "2026-03-27"
 published: true

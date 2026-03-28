@@ -36,7 +36,7 @@ image: ""
 image_alt: ""
 awards: []
 
-one_liner: "Leia Gaccione cooks serious food in a neighborhood setting — five Iron Chef appearances, zero attitude about it."
+one_liner: "Leia Gaccione. Five Iron Chef appearances. Neighborhood setting."
 visit_status: "pending"
 last_updated: "2026-03-27"
 published: true

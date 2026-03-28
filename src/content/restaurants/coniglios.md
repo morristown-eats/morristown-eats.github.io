@@ -38,7 +38,7 @@ image: ""
 image_alt: ""
 awards: []
 
-one_liner: "~200 pizzas a day, winner of the 2023 NJ Pizza Bowl, and the kind of lunch spot that runs South Street."
+one_liner: "~200 pizzas a day. 2023 NJ Pizza Bowl winner. Cash only."
 visit_status: "pending"
 last_updated: "2026-03-27"
 published: true

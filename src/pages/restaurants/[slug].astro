@@ -7,7 +7,7 @@ import RestaurantCard from '../../components/RestaurantCard.astro';
 export async function getStaticPaths() {
   const restaurants = await getCollection('restaurants', ({ data }) => data.published);
   return restaurants.map(r => ({
-    params: { slug: r.data.slug },
+    params: { slug: r.slug },
     props: { restaurant: r },
   }));
 }
@@ -19,7 +19,7 @@ const { Content } = await restaurant.render();
 // Related restaurants: same neighborhood, excluding this one
 const allRestaurants = await getCollection('restaurants', ({ data }) => data.published);
 const related = allRestaurants
-  .filter(r => r.data.neighborhood === data.neighborhood && r.data.slug !== data.slug)
+  .filter(r => r.data.neighborhood === data.neighborhood && r.slug !== restaurant.slug)
   .slice(0, 3);
 
 // Format neighborhood label
@@ -39,7 +39,6 @@ const hasRatings = data.ratings &&
 const hasDishes = data.dishes && data.dishes.length > 0;
 const hasAwards = data.awards && data.awards.length > 0;
 ---
-
 <BaseLayout
   title={data.name}
   description={data.one_liner}
@@ -69,8 +68,7 @@ const hasAwards = data.awards && data.awards.length > 0;
           <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-5);">
             {data.ownership === 'independent' && (
               <span class="badge badge-independent">Independent</span>
-            )}
-            {data.ownership === 'local_group' && (
+            )}            {data.ownership === 'local_group' && (
               <span class="badge badge-local-group">Local Group</span>
             )}
             {data.byob && (
@@ -99,7 +97,6 @@ const hasAwards = data.awards && data.awards.length > 0;
             "{data.one_liner}"
           </p>
         </div>
-
         <!-- Sidebar: Quick facts -->
         <div>
           <div class="quick-facts">
@@ -130,8 +127,7 @@ const hasAwards = data.awards && data.awards.length > 0;
             {data.reservations && data.reservations !== 'walk-in' && data.reservations !== 'none' && (
               <div class="fact-row">
                 <span class="fact-label">Reservations</span>
-                <span class="fact-value">
-                  {data.reservations === 'opentable' && (
+                <span class="fact-value">                  {data.reservations === 'opentable' && (
                     <a href={`https://www.opentable.com/s?term=${encodeURIComponent(data.name + ' Morristown')}`} target="_blank" rel="noopener">OpenTable ↗</a>
                   )}
                   {data.reservations === 'phone' && 'Call ahead'}
@@ -177,7 +173,6 @@ const hasAwards = data.awards && data.awards.length > 0;
                 </span>
               </div>
             )}
-
             {data.good_for && data.good_for.length > 0 && (
               <div class="fact-row">
                 <span class="fact-label">Good for</span>
@@ -209,7 +204,6 @@ const hasAwards = data.awards && data.awards.length > 0;
   </section>
 
   <hr class="divider" style="margin: 0;" />
-
   <!-- What to Order -->
   {hasDishes && (
     <section class="page-section">
@@ -252,7 +246,6 @@ const hasAwards = data.awards && data.awards.length > 0;
       </div>
     </div>
   </section>
-
   <!-- Ratings -->
   {hasRatings && (
     <>
@@ -299,7 +292,6 @@ const hasAwards = data.awards && data.awards.length > 0;
       </section>
     </>
   )}
-
   <!-- Practical info -->
   {(data.parking || data.noise_level || data.wait_times) && (
     <>
@@ -350,7 +342,7 @@ const hasAwards = data.awards && data.awards.length > 0;
             {related.map(r => (
               <RestaurantCard
                 name={r.data.name}
-                slug={r.data.slug}
+                slug={r.slug}
                 cuisine={r.data.cuisine}
                 neighborhood={r.data.neighborhood}
                 price={r.data.price}

@@ -38,7 +38,6 @@ const pageTitle = activeNeighborhoodLabel
   ? `${activeCuisineLabel} Restaurants`
   : 'All Restaurants';
 ---
-
 <BaseLayout
   title={pageTitle}
   description={`Independent restaurants in Morristown, NJ. ${activeNeighborhoodLabel ? `Browsing: ${activeNeighborhoodLabel}.` : ''} No chains, no sponsors, no pay-to-play.`}
@@ -90,7 +89,6 @@ const pageTitle = activeNeighborhoodLabel
       </p>
     </div>
   </section>
-
   <!-- Results -->
   <section class="page-section">
     <div class="container">
@@ -100,7 +98,7 @@ const pageTitle = activeNeighborhoodLabel
             {filtered.map(r => (
               <RestaurantCard
                 name={r.data.name}
-                slug={r.data.slug}
+                slug={r.slug}
                 cuisine={r.data.cuisine}
                 neighborhood={r.data.neighborhood}
                 price={r.data.price}
@@ -135,7 +133,7 @@ const pageTitle = activeNeighborhoodLabel
               {g.restaurants.map(r => (
                 <RestaurantCard
                   name={r.data.name}
-                  slug={r.data.slug}
+                  slug={r.slug}
                   cuisine={r.data.cuisine}                  neighborhood={r.data.neighborhood}
                   price={r.data.price}
                   byob={r.data.byob}

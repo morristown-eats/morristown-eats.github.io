@@ -16,7 +16,6 @@ const neighborhoodsWithCount = neighborhoods.map(n => ({
   count: allRestaurants.filter(r => r.data.neighborhood === n.slug).length,
 })).filter(n => n.count > 0);
 ---
-
 <BaseLayout
   title="Morristown Eats"
   description="The independent restaurant guide to Morristown, NJ. No ads. No pay-to-play. Visit first, write second."
@@ -50,7 +49,7 @@ const neighborhoodsWithCount = neighborhoods.map(n => ({
         {featured.map(r => (
           <RestaurantCard
             name={r.data.name}
-            slug={r.data.slug}
+            slug={r.slug}
             cuisine={r.data.cuisine}
             neighborhood={r.data.neighborhood}
             price={r.data.price}
@@ -65,7 +64,6 @@ const neighborhoodsWithCount = neighborhoods.map(n => ({
       </div>
     </div>
   </section>
-
   <!-- NEIGHBORHOODS -->
   <section class="page-section-alt">
     <div class="container">

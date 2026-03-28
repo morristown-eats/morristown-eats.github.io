@@ -4,7 +4,6 @@ const restaurants = defineCollection({
   type: 'content',
   schema: z.object({
     name: z.string(),
-    slug: z.string(),
     status: z.enum(['active', 'closed', 'coming_soon']).default('active'),
 
     // Classification

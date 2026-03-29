@@ -25,10 +25,16 @@ hours:
 byob: false
 outdoor_seating: false
 
-good_for: []
-vibe: []
+good_for: ["family dinner", "friday night", "date night"]
+vibe: ["new comfort food", "colorful", "bold", "fusion"]
 
-dishes: []
+dishes:
+  - name: "Shrimp Tacos"
+    take: "Purple cabbage slaw, creamy sauce with range. The default order."
+  - name: "Plantain Shrimp Guacamole Bites"
+    take: "Off-menu comp — if they ever put this on the menu, order it immediately."
+  - name: "Blueberry Frozen Margarita"
+    take: "Daily flavors now. Bright, strong, not a slushee."
 
 parking: ""
 
@@ -36,13 +42,14 @@ image: ""
 image_alt: ""
 awards: []
 
-one_liner: "Mexican on South Street. Two NJ locations. Weekend brunch with bottomless mimosas. Taco Tuesday worth the trip."
+one_liner: "Bold Mexican-American with strong daily-flavor frozen margs. The comps alone are worth the trip."
 visit_status: "visited"
-last_updated: "2026-03-27"
+last_visited: "2026-03-29"
+last_updated: "2026-03-29"
 published: true
 
 owner_names: []
 awards_note: ""
 ---
 
-Visit pending.
+The frozen margaritas are doing daily flavors now and that alone is worth the walk downtown. Family dinner on a Saturday — blueberry frozen margs to start, shrimp tacos on purple cabbage slaw, and a comp of plantain shrimp guacamole bites that aren't on the menu but should be. Paper menus are back. More energy in the room than last time. Come on a Friday or Saturday.

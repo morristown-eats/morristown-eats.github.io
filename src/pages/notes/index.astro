@@ -1,0 +1,148 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const allNotes = await getCollection('notes', ({ data }) => data.published);
+allNotes.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+---
+<BaseLayout
+  title="Field Notes"
+  description="First-person dispatches from Morristown restaurants, bars, coffee shops, and more. No reviews. Just notes from real visits."
+>
+  <style>
+    .notes-wrap {
+      max-width: 680px;
+      padding: 4rem 0 6rem;
+    }
+    .notes-header {
+      margin-bottom: 3rem;
+    }
+    .notes-header .label {
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+    .notes-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      line-height: 1.05;
+      margin-bottom: 1rem;
+    }
+    .notes-header .notes-sub {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.7;
+      color: var(--color-ink-muted);
+      max-width: 500px;
+    }
+    .note-card {
+      display: block;
+      border-bottom: 2px solid var(--color-paper-dark);
+      padding: 2rem 0;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s;
+    }
+    .note-card:first-of-type {
+      border-top: 2px solid var(--color-ink);
+    }
+    .note-card:hover {
+      border-bottom-color: var(--color-rust);
+    }
+    .note-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    .note-card-badge {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--color-rust);
+      color: var(--color-paper);
+      padding: 1px 6px;
+    }
+    .note-card-date {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-ink-muted);
+    }
+    .note-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+      color: var(--color-ink);
+    }
+    .note-card p {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      line-height: 1.6;
+      color: var(--color-ink-muted);
+      margin: 0;
+      font-style: italic;
+    }
+    .note-card-tags {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    .notes-empty {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--color-ink-muted);
+      font-style: italic;
+      padding: 3rem 0;
+      border-top: 2px solid var(--color-ink);
+    }
+  </style>
+
+  <div class="container">
+    <div class="notes-wrap">
+
+      <div class="notes-header">
+        <span class="label">From the Field</span>
+        <h1>Field Notes.</h1>
+        <p class="notes-sub">
+          First-person dispatches from Morristown restaurants, bars, coffee shops, and more.
+          Not reviews. Notes from real visits, paid for out of pocket.
+        </p>
+      </div>
+
+      {allNotes.length === 0 ? (
+        <div class="notes-empty">
+          First notes coming soon. The meals are happening.
+        </div>
+      ) : (
+        allNotes.map(note => {
+          const dateObj = new Date(note.data.date + 'T12:00:00');
+          const dateLabel = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+          return (
+            <a href={`/notes/${note.slug}`} class="note-card">
+              <div class="note-card-meta">
+                <span class="note-card-badge">{note.data.noteTypeLabel}</span>
+                <span class="note-card-date">{dateLabel}</span>
+              </div>
+              <h3>{note.data.establishment}</h3>
+              <p>{note.data.lede}</p>
+              <div class="note-card-tags">
+                {note.data.vibeTags.map((tag: string) => (
+                  <span class="tag">{tag}</span>
+                ))}
+              </div>
+            </a>
+          );
+        })
+      )}
+
+    </div>
+  </div>
+
+</BaseLayout>

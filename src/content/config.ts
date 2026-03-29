@@ -1,5 +1,26 @@
 import { defineCollection, z } from 'astro:content';
 
+const notes = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    establishment: z.string(),
+    establishmentSlug: z.string(),
+    date: z.string(),
+    noteType: z.enum(['meal_note', 'counter_note', 'bar_note', 'truck_note', 'shelf_note', 'visit_note']),
+    noteTypeLabel: z.string(),
+    visitType: z.string(),
+    neighborhood: z.string(),
+    address: z.string(),
+    price: z.string(),
+    vibeTags: z.array(z.string()).default([]),
+    lede: z.string(),
+    wouldReturn: z.string().optional(),
+    bestFor: z.string().optional(),
+    published: z.boolean().default(false),
+  }),
+});
+
 const restaurants = defineCollection({
   type: 'content',
   schema: z.object({
@@ -69,4 +90,4 @@ const restaurants = defineCollection({
   }),
 });
 
-export const collections = { restaurants };
+export const collections = { restaurants, notes };

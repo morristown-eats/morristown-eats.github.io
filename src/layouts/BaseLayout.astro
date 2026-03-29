@@ -66,6 +66,7 @@ const currentPath = Astro.url.pathname;
       <nav aria-label="Main navigation">
         <ul class="site-nav" id="siteNav" role="list">
           <li><a href="/restaurants" aria-current={currentPath.startsWith('/restaurants') ? 'page' : undefined}>Restaurants</a></li>
+          <li><a href="/notes" aria-current={currentPath.startsWith('/notes') ? 'page' : undefined}>Notes</a></li>
           <li><a href="/map" aria-current={currentPath === '/map' ? 'page' : undefined}>Map</a></li>
           <li><a href="/spill" aria-current={currentPath.startsWith('/spill') ? 'page' : undefined}>Spill</a></li>
           <li><a href="/about" aria-current={currentPath === '/about' ? 'page' : undefined}>About</a></li>
@@ -101,6 +102,7 @@ const currentPath = Astro.url.pathname;
           <span class="footer-col-heading">Navigate</span>
           <ul class="footer-links" role="list">
             <li><a href="/restaurants">Restaurants</a></li>
+            <li><a href="/notes">Field Notes</a></li>
             <li><a href="/map">Map</a></li>
             <li><a href="/spill">Spill the Tea</a></li>
             <li><a href="/about">About</a></li>

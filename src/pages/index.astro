@@ -1,115 +1,735 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import RestaurantCard from '../components/RestaurantCard.astro';
-import LatestNotes from '../components/LatestNotes.astro';
-import neighborhoods from '../data/neighborhoods.json';
-
-const allRestaurants = await getCollection('restaurants', ({ data }) => data.published);
-allRestaurants.sort(() => Math.random() - 0.5);
-
-const featured = allRestaurants.slice(0, 6);
-
-const neighborhoodsWithCount = neighborhoods.map(n => ({
-  ...n,
-  count: allRestaurants.filter(r => r.data.neighborhood === n.slug).length,
-})).filter(n => n.count > 0);
+// Morristown Eats — Single Page Dashboard
+// No framework overhead. One page. Opens fast. Easy to maintain.
 ---
-<BaseLayout
-  title="Morristown Eats"
-  description="The independent restaurant guide to Morristown, NJ. No ads. No pay-to-play. Visit first, write second."
->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morristown Eats</title>
+  <meta name="description" content="A local guide to what's actually worth eating in Morristown, NJ. No pay-to-play. No chains. Visit first, write second." />
+  <meta property="og:title" content="Morristown Eats" />
+  <meta property="og:description" content="A local guide to what's actually worth eating in Morristown, NJ." />
+  <meta property="og:url" content="https://morristowneats.com" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a1208;
+      --paper: #f5efe3;
+      --paper-dark: #ede5d0;
+      --terracotta: #b84c2b;
+      --sage: #6b7c5e;
+      --mustard: #c9972a;
+      --cream: #faf6ed;
+      --rule: #c8b99a;
+    }
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="container">
-      <p class="hero-eyebrow">Morristown, New Jersey</p>
-      <h1>The independent<br/>restaurant guide<br/>to this town.</h1>
-      <p class="hero-sub">
-        No pay-to-play. No sponsored posts. No chains.
-        Every restaurant visited. Every meal paid for.
-      </p>
-      <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center;">
-        <a href="/restaurants" class="btn btn-primary">Explore Restaurants</a>
-        <a href="/about" class="btn btn-outline">How this works</a>
-      </div>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    header {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 2.5rem 2rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: repeating-linear-gradient(90deg, var(--terracotta) 0, var(--terracotta) 8px, transparent 8px, transparent 12px);
+    }
+
+    .masthead-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .wordmark {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.8rem, 8vw, 4.5rem);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .wordmark span {
+      display: block;
+      color: var(--terracotta);
+      font-style: italic;
+    }
+
+    .masthead-right { text-align: right; }
+
+    .dateline {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--rule);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .tagline {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--paper-dark);
+      max-width: 280px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      margin: 2.5rem 0 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    .about-strip {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 1.5rem 2rem;
+      margin: 0 -1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .about-strip { grid-template-columns: 1fr; }
+    }
+
+    .about-item {
+      border-left: 2px solid var(--terracotta);
+      padding-left: 0.85rem;
+    }
+
+    .about-item h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      margin-bottom: 0.35rem;
+    }
+
+    .about-item p {
+      font-size: 0.82rem;
+      color: var(--paper-dark);
+      line-height: 1.5;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1.25rem 0 1rem;
+    }
+
+    .filter-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.85rem;
+      border: 1px solid var(--rule);
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--terracotta);
+      border-color: var(--terracotta);
+      color: white;
+    }
+
+    .count-display {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--sage);
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+    }
+
+    .restaurant-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 580px) {
+      .restaurant-grid { grid-template-columns: 1fr; }
+    }
+
+    .restaurant-card {
+      background: var(--cream);
+      padding: 1.25rem 1.1rem;
+      transition: background 0.15s;
+    }
+
+    .restaurant-card:hover { background: var(--paper-dark); }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.15rem;
+      line-height: 1.2;
+      color: var(--ink);
+    }
+
+    .card-type {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: white;
+      background: var(--sage);
+      padding: 0.2rem 0.5rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .card-type.type-coffee { background: var(--mustard); color: var(--ink); }
+    .card-type.type-bar    { background: #5a4a6b; }
+    .card-type.type-bakery { background: #9b6b3a; }
+
+    .card-cuisine {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--terracotta);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .card-meta {
+      font-size: 0.78rem;
+      color: #5a4e3d;
+      margin-bottom: 0.55rem;
+      line-height: 1.4;
+    }
+
+    .card-meta strong { color: var(--ink); font-weight: 600; }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.52rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: 1px solid var(--rule);
+      padding: 0.1rem 0.45rem;
+      color: #6b5e48;
+    }
+
+    .tag.byob { border-color: var(--terracotta); color: var(--terracotta); }
+
+    .card-note {
+      margin-top: 0.6rem;
+      font-style: italic;
+      font-size: 0.78rem;
+      color: #6b5e48;
+      border-top: 1px solid var(--rule);
+      padding-top: 0.5rem;
+      line-height: 1.45;
+    }
+
+    .restaurant-card.hidden { display: none; }
+
+    .newsletter-block {
+      background: var(--terracotta);
+      color: white;
+      padding: 2rem;
+      margin: 0 -1.5rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    @media (max-width: 600px) {
+      .newsletter-block { grid-template-columns: 1fr; }
+    }
+
+    .newsletter-block h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      line-height: 1.2;
+      margin-bottom: 0.4rem;
+    }
+
+    .newsletter-block p {
+      font-size: 0.85rem;
+      opacity: 0.88;
+      max-width: 420px;
+    }
+
+    .newsletter-cta {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.85rem 1.6rem;
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.15s;
+    }
+
+    .newsletter-cta:hover { background: #2d2010; }
+
+    .manifesto {
+      padding: 2rem 0 1rem;
+      border-top: 1px solid var(--rule);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 560px) {
+      .manifesto { grid-template-columns: 1fr; }
+    }
+
+    .manifesto h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .manifesto p {
+      font-size: 0.82rem;
+      color: #5a4e3d;
+      line-height: 1.6;
+    }
+
+    footer {
+      background: var(--ink);
+      color: var(--rule);
+      text-align: center;
+      padding: 1.25rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="masthead-inner">
+    <div class="wordmark">
+      Morristown<span>Eats</span>
     </div>
-  </section>
-
-  <!-- EDITOR'S PICKS -->
-  <section class="page-section">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-header-left">
-          <span class="label">Editor's Picks</span>
-          <h2>Where to eat in Morristown</h2>
-        </div>
-        <a href="/restaurants" class="btn btn-outline btn-sm">See all →</a>
-      </div>
-
-      <div class="restaurant-grid">
-        {featured.map(r => (
-          <RestaurantCard
-            name={r.data.name}
-            slug={r.slug}
-            cuisine={r.data.cuisine}
-            neighborhood={r.data.neighborhood}
-            price={r.data.price}
-            byob={r.data.byob}
-            ownership={r.data.ownership}
-            one_liner={r.data.one_liner}
-            image={r.data.image}
-            image_alt={r.data.image_alt}
-            visit_status={r.data.visit_status}
-          />
-        ))}
-      </div>
+    <div class="masthead-right">
+      <div class="dateline">Morristown, NJ &nbsp;·&nbsp; Est. 2026</div>
+      <div class="tagline">A guide to what's actually worth eating.</div>
     </div>
-  </section>
+  </div>
+</header>
 
-  <!-- LATEST VISITS -->
-  <LatestNotes />
+<main>
 
-  <!-- NEIGHBORHOODS -->
-  <section class="page-section-alt">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-header-left">
-          <span class="label">Browse by neighborhood</span>
-          <h2>Where in town?</h2>
-        </div>
-      </div>
-
-      <div class="neighborhood-grid">
-        {neighborhoodsWithCount.map(n => (
-          <a
-            href={`/restaurants?neighborhood=${n.slug}`}
-            class="neighborhood-block"
-            aria-label={`${n.label} — ${n.count} restaurants`}
-          >
-            <div>
-              <p class="neighborhood-name">{n.label}</p>
-              <p class="neighborhood-count">{n.count} {n.count === 1 ? 'place' : 'places'}</p>
-            </div>
-          </a>
-        ))}
-      </div>
+  <div class="section-label">What this is</div>
+  <div class="about-strip">
+    <div class="about-item">
+      <h3>No pay-to-play</h3>
+      <p>Every listing is earned. No business pays for coverage. Not ever.</p>
     </div>
-  </section>
-
-  <!-- WHY THIS EXISTS -->
-  <section class="page-section">
-    <div class="container">
-      <div style="max-width: 640px; margin: 0 auto; text-align: center;">
-        <span class="label" style="display:block; margin-bottom:1rem;">Why this exists</span>
-        <h2 style="margin-bottom:1.5rem;">Morristown has a real food scene. It deserves a real guide.</h2>
-        <p style="font-family: var(--font-body); font-size: var(--text-base); line-height: 1.8; color: var(--color-ink-muted); margin-bottom: 2rem;">
-          No pay-to-play. No sponsored content. Every meal paid for out of pocket.
-          Every restaurant visited before anything is written. Independent places first.
-        </p>
-        <a href="/about" class="btn btn-outline">Read the standards</a>
-      </div>
+    <div class="about-item">
+      <h3>Visit first</h3>
+      <p>Nothing gets published without a personal visit. This is a guide, not a directory.</p>
     </div>
-  </section>
+    <div class="about-item">
+      <h3>Independent-first</h3>
+      <p>Morristown has real restaurants. This is where to find them.</p>
+    </div>
+  </div>
 
-</BaseLayout>
+  <div class="section-label">The List</div>
+
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="restaurant">Restaurant</button>
+    <button class="filter-btn" data-filter="coffee">Coffee</button>
+    <button class="filter-btn" data-filter="bakery">Bakery</button>
+    <button class="filter-btn" data-filter="bar">Bar</button>
+    <button class="filter-btn" data-filter="byob">BYOB</button>
+  </div>
+
+  <div class="count-display" id="count-display">Showing all places</div>
+
+  <div class="restaurant-grid" id="restaurant-grid">
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="true">
+      <div class="card-top">
+        <div class="card-name">Chef Fredy's Table</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Salvadoran / Latin</div>
+      <div class="card-meta">78 Speedwell Ave &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Mon–Sun 11:30am–10pm</div>
+      <div class="card-tags">
+        <span class="tag byob">BYOB</span>
+        <span class="tag">Speedwell</span>
+        <span class="tag">OpenTable</span>
+      </div>
+      <div class="card-note">The only Salvadoran kitchen in Morristown. No corkage fee. The liquor store next door is not a coincidence.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="true">
+      <div class="card-top">
+        <div class="card-name">South + Pine American Eatery</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">American</div>
+      <div class="card-meta">90 South St &nbsp;·&nbsp; <strong>$$$</strong> &nbsp;·&nbsp; Dinner only</div>
+      <div class="card-tags">
+        <span class="tag byob">BYOB</span>
+        <span class="tag">South St</span>
+        <span class="tag">Patio</span>
+      </div>
+      <div class="card-note">Chef Leia Gaccione. Five-time Iron Chef America challenger. Runs quietly. Worth it.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="true">
+      <div class="card-top">
+        <div class="card-name">Coniglio's Old Fashioned</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Pizza</div>
+      <div class="card-meta">11 South St &nbsp;·&nbsp; <strong>$</strong> &nbsp;·&nbsp; Mon–Thu 7am–10pm, Fri 7am–11pm, Sat–Sun 8am–11pm</div>
+      <div class="card-tags">
+        <span class="tag byob">BYOB</span>
+        <span class="tag">South St</span>
+        <span class="tag">Counter Service</span>
+      </div>
+      <div class="card-note">Won the 2023 NJ Pizza Bowl. About 200 pizzas out the door daily. That's the whole story.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="true">
+      <div class="card-top">
+        <div class="card-name">Marjan Fine Persian Grill</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Persian</div>
+      <div class="card-meta">Speedwell Ave &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Call ahead</div>
+      <div class="card-tags">
+        <span class="tag byob">BYOB</span>
+        <span class="tag">Speedwell</span>
+        <span class="tag">Under the Radar</span>
+      </div>
+      <div class="card-note">Morristown's only Persian restaurant. Genuinely underappreciated. The kind of place that closes if not enough people know about it.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="true">
+      <div class="card-top">
+        <div class="card-name">Masago Japanese Cuisine</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Japanese / Sushi</div>
+      <div class="card-meta">Morristown &nbsp;·&nbsp; <strong>$$</strong></div>
+      <div class="card-tags">
+        <span class="tag byob">BYOB</span>
+        <span class="tag">Sushi</span>
+      </div>
+      <div class="card-note">The answer to "where do you go for sushi." BYOB sushi in Morristown is a specific and popular category. Masago has earned the spot.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="false">
+      <div class="card-top">
+        <div class="card-name">Ju-Ichi</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Japanese / Ramen</div>
+      <div class="card-meta">Morristown &nbsp;·&nbsp; <strong>$$</strong></div>
+      <div class="card-tags">
+        <span class="tag">Ramen</span>
+        <span class="tag">Independent</span>
+      </div>
+      <div class="card-note">Serious ramen. Independent. The kind of bowl you come back for.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="true">
+      <div class="card-top">
+        <div class="card-name">The Address</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Greek / Mediterranean</div>
+      <div class="card-meta">20 South St &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Mon–Sun from 11:30am</div>
+      <div class="card-tags">
+        <span class="tag byob">BYOB + Bar</span>
+        <span class="tag">South St</span>
+        <span class="tag">Patio</span>
+        <span class="tag">OpenTable</span>
+      </div>
+      <div class="card-note">Heated patio year-round. Greek-Mediterranean from an independent kitchen. Gluten-free options available.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="true">
+      <div class="card-top">
+        <div class="card-name">Pavesi Ristorante</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Italian</div>
+      <div class="card-meta">50 South St &nbsp;·&nbsp; <strong>$$$</strong> &nbsp;·&nbsp; Tue–Sat 12pm–10pm</div>
+      <div class="card-tags">
+        <span class="tag byob">BYOB</span>
+        <span class="tag">South St</span>
+        <span class="tag">Patio</span>
+        <span class="tag">OpenTable</span>
+      </div>
+      <div class="card-note">Year-round heated tent patio. Closed Sunday and Monday. Italian from an independent kitchen on the South Street corridor.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="bakery" data-byob="false">
+      <div class="card-top">
+        <div class="card-name">Dän Bakery &amp; Café</div>
+        <div class="card-type type-bakery">Bakery</div>
+      </div>
+      <div class="card-cuisine">Bakery / Café</div>
+      <div class="card-meta">64 South St &nbsp;·&nbsp; <strong>$</strong> &nbsp;·&nbsp; Sun–Thu 9am–8pm, Fri–Sat 9am–9pm</div>
+      <div class="card-tags">
+        <span class="tag">South St</span>
+        <span class="tag">La Colombe Coffee</span>
+        <span class="tag">Kazakh Heritage</span>
+      </div>
+      <div class="card-note">Honey Cake. San Sebastian Cheesecake. Pistachio Roll. Central Asian pastry tradition on South Street. Worth the detour for the Honey Cake alone.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="coffee" data-byob="false">
+      <div class="card-top">
+        <div class="card-name">Ethan and the Bean</div>
+        <div class="card-type type-coffee">Coffee</div>
+      </div>
+      <div class="card-cuisine">Café / Coffee</div>
+      <div class="card-meta">70 Speedwell Ave &nbsp;·&nbsp; <strong>$</strong> &nbsp;·&nbsp; Mon–Sat 8am–5pm, Sun 8am–3pm</div>
+      <div class="card-tags">
+        <span class="tag">Speedwell</span>
+        <span class="tag">Non-Profit</span>
+        <span class="tag">Community</span>
+      </div>
+      <div class="card-note">Mission-driven café employing intellectually and developmentally disabled young adults. Founded 2019. One of the more important businesses in town.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="false">
+      <div class="card-top">
+        <div class="card-name">Morristown Bagel &amp; Deli</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Deli / Bagels</div>
+      <div class="card-meta">Speedwell Ave area &nbsp;·&nbsp; <strong>$</strong> &nbsp;·&nbsp; Morning–early lunch</div>
+      <div class="card-tags">
+        <span class="tag">75+ Years</span>
+        <span class="tag">Breakfast</span>
+        <span class="tag">Deli</span>
+      </div>
+      <div class="card-note">75 years. That number means something. A historical anchor for Morristown's food scene that most newer residents have never tried.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="false">
+      <div class="card-top">
+        <div class="card-name">Morristown Diner</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Diner / American</div>
+      <div class="card-meta">Morristown &nbsp;·&nbsp; <strong>$</strong></div>
+      <div class="card-tags">
+        <span class="tag">Classic</span>
+        <span class="tag">Breakfast</span>
+        <span class="tag">Independent</span>
+      </div>
+      <div class="card-note">A real diner. Not the nostalgia version — the actual thing. Morristown has one. This is it.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="false">
+      <div class="card-top">
+        <div class="card-name">Orale Mexican Kitchen</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Mexican</div>
+      <div class="card-meta">56 South St &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Mon–Thu 3pm–10pm, Fri–Sun 12pm–10pm</div>
+      <div class="card-tags">
+        <span class="tag">Full Bar</span>
+        <span class="tag">South St</span>
+        <span class="tag">OpenTable</span>
+      </div>
+      <div class="card-note">Full liquor bar, weekend lunch, late bar hours on weekends. The better Mexican option on South Street.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="false">
+      <div class="card-top">
+        <div class="card-name">Sushi Lounge</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Japanese / Sushi</div>
+      <div class="card-meta">9 Speedwell Ave &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Mon–Thu 11:30am–10pm, Fri–Sat to 11pm</div>
+      <div class="card-tags">
+        <span class="tag">Full Bar</span>
+        <span class="tag">Speedwell</span>
+        <span class="tag">OpenTable</span>
+        <span class="tag">NJ Monthly Pick</span>
+      </div>
+      <div class="card-note">DJs most nights. NJ Monthly "Best Sushi" recognition. The livelier sushi option — if that's what you're after.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="false">
+      <div class="card-top">
+        <div class="card-name">The Committed Pig</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">American / Burgers</div>
+      <div class="card-meta">28 W Park Pl &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Mon–Fri 10am–9pm, Sat 9am–9pm</div>
+      <div class="card-tags">
+        <span class="tag">Full Bar</span>
+        <span class="tag">The Green</span>
+        <span class="tag">OpenTable</span>
+      </div>
+      <div class="card-note">On the Green since 2009. Full bar. The local burger institution — locally-owned group across 3 NJ locations.</div>
+    </div>
+
+    <div class="restaurant-card" data-type="restaurant" data-byob="false">
+      <div class="card-top">
+        <div class="card-name">South Street Creamery &amp; Red Sea Café</div>
+        <div class="card-type">Restaurant</div>
+      </div>
+      <div class="card-cuisine">Ice Cream / Ethiopian</div>
+      <div class="card-meta">146–148 South St &nbsp;·&nbsp; <strong>$</strong></div>
+      <div class="card-tags">
+        <span class="tag">27 Years</span>
+        <span class="tag">Family-Owned</span>
+        <span class="tag">Unique</span>
+      </div>
+      <div class="card-note">Ice cream and Ethiopian café in the same space. Family-owned since 1999. One of the more singular concepts in Morristown.</div>
+    </div>
+
+  </div>
+
+  <div class="section-label">Stay in the loop</div>
+  <div class="newsletter-block">
+    <div>
+      <h2>The Morristown Eats newsletter.</h2>
+      <p>New openings, visit notes, what's worth trying right now. No sponsored content. No filler. When there's something worth saying, it goes here.</p>
+    </div>
+    <a class="newsletter-cta" href="https://morristowneats.substack.com" target="_blank" rel="noopener">Subscribe on Substack →</a>
+  </div>
+
+  <div class="section-label">About</div>
+  <div class="manifesto">
+    <div>
+      <h3>What Morristown Eats is.</h3>
+      <p>A local guide built on actual visits. No sponsored listings, no pay-to-play, no open comment sections. Just the restaurants worth knowing about, written by someone who eats here.</p>
+    </div>
+    <div>
+      <h3>What it isn't.</h3>
+      <p>It's not Yelp. It's not a complaint platform. It's not chain-first or advertiser-first. Silence is the negative review. If a place isn't listed, it either hasn't been visited yet or isn't worth your time.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Morristown Eats &nbsp;·&nbsp; Morristown, NJ &nbsp;·&nbsp; No pay-to-play &nbsp;·&nbsp; Visit before publish
+</footer>
+
+<script>
+  const grid = document.getElementById('restaurant-grid');
+  const cards = Array.from(grid.querySelectorAll('.restaurant-card'));
+  const countEl = document.getElementById('count-display');
+  const filterBtns = document.querySelectorAll('.filter-btn');
+
+  function updateCount(shown) {
+    const total = cards.length;
+    countEl.textContent = shown === total
+      ? `Showing all ${total} places`
+      : `Showing ${shown} of ${total} places`;
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      let count = 0;
+      cards.forEach(card => {
+        const match = f === 'all'
+          || card.dataset.type === f
+          || (f === 'byob' && card.dataset.byob === 'true');
+        card.classList.toggle('hidden', !match);
+        if (match) count++;
+      });
+      updateCount(count);
+    });
+  });
+
+  updateCount(cards.length);
+</script>
+
+</body>
+</html>

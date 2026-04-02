@@ -15,22 +15,17 @@ const grouped = neighborhoods.map(n => ({
   title="Map"
   description="Every restaurant in Morristown, NJ — on an actual map."
 >
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
   <style>
-    /* ─── Page Layout ─── */
-    .map-page {
-      padding-bottom: 0;
-    }
+    .map-page { padding-bottom: 0; }
     .map-page-header {
       text-align: center;
       padding: 2.5rem 0 1.5rem;
     }
-    .map-page-header .label {
-      display: block;
-      margin-bottom: 0.5rem;
-    }
+    .map-page-header .label { display: block; margin-bottom: 0.5rem; }
     .map-page-header h1 {
       font-family: var(--font-display);
       font-size: clamp(2rem, 5vw, 3rem);
@@ -42,7 +37,7 @@ const grouped = neighborhoods.map(n => ({
       font-size: var(--text-sm);
     }
 
-    /* ─── View Toggle ─── */
+    /* View toggle */
     .view-toggle {
       display: flex;
       justify-content: center;
@@ -61,13 +56,12 @@ const grouped = neighborhoods.map(n => ({
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
     }
-    .view-btn.active,
-    .view-btn:hover {
+    .view-btn.active, .view-btn:hover {
       background: var(--color-ink);
       color: var(--color-paper);
     }
 
-    /* ─── Filter Bar ─── */
+    /* Filter bar */
     .filter-bar {
       display: flex;
       flex-wrap: wrap;
@@ -100,21 +94,17 @@ const grouped = neighborhoods.map(n => ({
       color: var(--color-ink);
     }
 
-    /* ─── Map Container ─── */
-    #map-view {
-      width: 100%;
-    }
+    /* Map */
+    #map-view { width: 100%; }
     #leaflet-map {
       width: 100%;
-      height: 620px;
+      height: 640px;
       border-top: 2px solid var(--color-ink);
       border-bottom: 2px solid var(--color-ink);
     }
 
-    /* ─── List View ─── */
-    #list-view {
-      display: none;
-    }
+    /* List view */
+    #list-view { display: none; }
     .list-view-inner {
       background: var(--color-paper-dark);
       border-top: 2px solid var(--color-ink);
@@ -127,7 +117,6 @@ const grouped = neighborhoods.map(n => ({
       gap: 1.25rem;
       max-width: 1100px;
       margin: 0 auto;
-      position: relative;
     }
     .list-zone {
       background: var(--color-paper);
@@ -159,11 +148,7 @@ const grouped = neighborhoods.map(n => ({
       margin-bottom: 0.75rem;
       display: block;
     }
-    .list-zone-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
+    .list-zone-list { list-style: none; padding: 0; margin: 0; }
     .list-zone-list li {
       font-family: var(--font-body);
       font-size: 0.8rem;
@@ -184,7 +169,6 @@ const grouped = neighborhoods.map(n => ({
       font-family: var(--font-mono);
       font-size: 0.55rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
       background: var(--color-olive);
       color: var(--color-paper);
       padding: 0.05rem 0.3rem;
@@ -192,33 +176,30 @@ const grouped = neighborhoods.map(n => ({
       vertical-align: middle;
     }
 
-    /* ─── Leaflet popup overrides ─── */
+    /* Popup overrides */
     .leaflet-popup-content-wrapper {
       background: #F0E6C8;
       border: 2px solid #1A1208;
-      border-radius: 0;
-      box-shadow: 4px 4px 0 #1A1208;
-      transform: rotate(-0.4deg);
-      padding: 0;
+      border-radius: 0 !important;
+      box-shadow: 4px 4px 0 #1A1208 !important;
+      padding: 0 !important;
     }
     .leaflet-popup-content {
-      margin: 0;
-      padding: 0;
-      width: 220px !important;
+      margin: 0 !important;
+      width: 210px !important;
     }
     .leaflet-popup-tip-container { display: none; }
     .leaflet-popup-close-button {
       color: #1A1208 !important;
       font-size: 18px !important;
-      top: 6px !important;
-      right: 8px !important;
+      top: 4px !important;
+      right: 6px !important;
+      font-weight: normal !important;
     }
-    .me-popup {
-      padding: 1rem 1.1rem 0.9rem;
-    }
+    .me-popup { padding: 0.9rem 1rem 0.85rem; }
     .me-popup-name {
       font-family: 'Permanent Marker', cursive;
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: #1A1208;
       line-height: 1.2;
       margin: 0 0 0.3rem;
@@ -226,32 +207,32 @@ const grouped = neighborhoods.map(n => ({
     }
     .me-popup-meta {
       font-family: 'Space Mono', monospace;
-      font-size: 0.6rem;
+      font-size: 0.58rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: #7A6550;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.45rem;
       display: flex;
-      gap: 0.5rem;
+      gap: 0.4rem;
       flex-wrap: wrap;
       align-items: center;
     }
     .me-popup-byob {
       background: #5A6634;
       color: #F0E6C8;
-      padding: 0.05rem 0.35rem;
-      font-size: 0.55rem;
+      padding: 0.05rem 0.3rem;
+      font-size: 0.52rem;
     }
     .me-popup-liner {
       font-family: 'Special Elite', serif;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: #1A1208;
       line-height: 1.5;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.65rem;
     }
     .me-popup-link {
       font-family: 'Space Mono', monospace;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: #C4572A;
@@ -260,14 +241,13 @@ const grouped = neighborhoods.map(n => ({
     }
     .me-popup-link:hover { color: #1A1208; border-color: #1A1208; }
 
-    /* ─── Mobile ─── */
+    /* Mobile */
     @media (max-width: 640px) {
       #leaflet-map { height: 480px; }
       .filter-bar {
         flex-wrap: nowrap;
         overflow-x: auto;
         justify-content: flex-start;
-        padding: 0 1rem 0.75rem;
         -webkit-overflow-scrolling: touch;
       }
       .filter-bar::-webkit-scrollbar { display: none; }
@@ -283,14 +263,10 @@ const grouped = neighborhoods.map(n => ({
         <h1>Where everything is.</h1>
         <p>Morristown, NJ — tap any pin to see what's there.</p>
       </div>
-
-      <!-- View toggle -->
       <div class="view-toggle">
         <button class="view-btn active" id="btnMap">Map</button>
         <button class="view-btn" id="btnList">List</button>
       </div>
-
-      <!-- Neighborhood filter -->
       <div class="filter-bar" id="filterBar">
         <button class="filter-btn active" data-neighborhood="all">All</button>
         {neighborhoods.map(n => (
@@ -299,12 +275,10 @@ const grouped = neighborhoods.map(n => ({
       </div>
     </div>
 
-    <!-- Map view -->
     <div id="map-view">
       <div id="leaflet-map"></div>
     </div>
 
-    <!-- List view -->
     <div id="list-view">
       <div class="list-view-inner">
         <div class="list-grid">
@@ -330,11 +304,11 @@ const grouped = neighborhoods.map(n => ({
     </div>
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <script>
-    // ─── View toggle ───────────────────────────────────────────
+    // View toggle
     const btnMap = document.getElementById('btnMap');
     const btnList = document.getElementById('btnList');
     const mapView = document.getElementById('map-view');
@@ -342,127 +316,159 @@ const grouped = neighborhoods.map(n => ({
     const filterBar = document.getElementById('filterBar');
 
     btnMap?.addEventListener('click', () => {
-      btnMap.classList.add('active');
-      btnList?.classList.remove('active');
-      mapView!.style.display = '';
-      listView!.style.display = 'none';
+      btnMap.classList.add('active'); btnList?.classList.remove('active');
+      mapView!.style.display = ''; listView!.style.display = 'none';
       filterBar!.style.display = '';
     });
-
     btnList?.addEventListener('click', () => {
-      btnList.classList.add('active');
-      btnMap?.classList.remove('active');
-      listView!.style.display = '';
-      mapView!.style.display = 'none';
+      btnList.classList.add('active'); btnMap?.classList.remove('active');
+      listView!.style.display = ''; mapView!.style.display = 'none';
       filterBar!.style.display = 'none';
     });
 
-    // ─── Map init ──────────────────────────────────────────────
-    // Wait for Leaflet to load
-    window.addEventListener('load', initMap);
-
-    function initMap() {
-      if (typeof (window as any).L === 'undefined') return;
+    window.addEventListener('load', () => {
       const L = (window as any).L;
+      if (!L) return;
 
       const map = L.map('leaflet-map', {
-        center: [40.7969, -74.4815],
-        zoom: 15,
+        center: [40.7968, -74.4808],
+        zoom: 16,
         zoomControl: false,
-        scrollWheelZoom: true,
       });
 
-      // Custom zoom control — bottom right
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      // ─── Tile layer: CartoDB Voyager No Labels ───
-      // CSS filter warms it to match --color-paper palette
-      const tileLayer = L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
+      // Voyager WITH labels — clean, readable, warm-toned already
+      // Minimal filter — just a touch of warmth, don't kill contrast
+      const tiles = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
         {
           attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
           subdomains: 'abcd',
           maxZoom: 19,
         }
       );
-      tileLayer.addTo(map);
+      tiles.addTo(map);
 
-      // Apply warm sepia filter to the tile pane
+      // Very light warm tint — preserve contrast, just take the cold blue edge off
       const tilePane = map.getPanes().tilePane as HTMLElement;
-      tilePane.style.filter = 'sepia(35%) saturate(75%) brightness(103%) hue-rotate(-8deg)';
+      tilePane.style.filter = 'sepia(12%) saturate(90%) brightness(100%)';
 
-      // ─── Neighborhood label markers ───
-      // Centroids for each neighborhood — placed as ghosted HTML markers
-      const neighborhoodLabels: Record<string, [number, number]> = {
-        'south-street':       [40.7947, -74.4806],
-        'the-green':          [40.7984, -74.4822],
-        'speedwell':          [40.7965, -74.4744],
-        'washington-street':  [40.7968, -74.4837],
-        'morris-street':      [40.7970, -74.4785],
-        'headquarters-plaza': [40.7990, -74.4762],
-      };
-
-      const neighborhoodNames: Record<string, string> = {
-        'south-street': 'South Street',
-        'the-green': 'The Green',
-        'speedwell': 'Speedwell Ave',
-        'washington-street': 'Washington St',
-        'morris-street': 'Morris Street',
-        'headquarters-plaza': 'HQ Plaza',
-      };
-
-      const labelMarkers: Record<string, any> = {};
-
-      Object.entries(neighborhoodLabels).forEach(([slug, coords]) => {
-        const icon = L.divIcon({
-          className: '',
-          html: `<div class="nbhd-label" data-slug="${slug}">${neighborhoodNames[slug]}</div>`,
-          iconSize: [140, 30],
-          iconAnchor: [70, 15],
-        });
-        labelMarkers[slug] = L.marker(coords, { icon, interactive: false, zIndexOffset: -100 }).addTo(map);
+      // Cluster group — custom styling
+      const clusterGroup = (L as any).markerClusterGroup({
+        maxClusterRadius: 30,
+        iconCreateFunction: (cluster: any) => {
+          const count = cluster.getChildCount();
+          return L.divIcon({
+            className: '',
+            html: `<div class="me-cluster">${count}</div>`,
+            iconSize: [34, 34],
+            iconAnchor: [17, 17],
+          });
+        },
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
       });
 
-      // ─── Restaurant pins ───
-      interface RestaurantFeature {
-        type: string;
-        geometry: { type: string; coordinates: [number, number] };
+      // Accurate coordinates anchored to confirmed Google Maps points:
+      // 11 South St = 40.7958138, -74.4810113 (confirmed)
+      // 90 South St = 40.7942663, -74.4783894 (confirmed)
+      // All others placed from Morristown street grid knowledge
+      const COORDS: Record<string, [number, number]> = {
+        // South Street corridor (runs SW-NE)
+        "coniglios":               [40.7958, -74.4810],  // 11 South St — confirmed
+        "the-address":             [40.7963, -74.4815],  // 20 South St
+        "tacoria":                 [40.7956, -74.4806],  // 52 South St
+        "orale-mexican-kitchen":   [40.7954, -74.4803],  // 56 South St
+        "pavesi-ristorante":       [40.7952, -74.4800],  // 50 South St
+        "lokl-cafe":               [40.7948, -74.4796],  // 80 South St
+        "dan-bakery":              [40.7946, -74.4794],  // 64 South St
+        "south-and-pine":          [40.7944, -74.4790],  // 88 South St
+        "cotto":                   [40.7943, -74.4784],  // 90 South St — confirmed
+        "south-street-trattoria":  [40.7943, -74.4786],  // 90 South St area
+        "stirling-tavern":         [40.7935, -74.4775],  // 150 South St
+
+        // Washington Street (parallel to South, slightly west)
+        "surreal-creamery":        [40.7970, -74.4836],  // 5 Washington St
+        "the-frog":                [40.7967, -74.4840],  // 18 Washington St
+        "ju-ichi":                 [40.7965, -74.4843],  // 29 Washington St
+        "masago":                  [40.7963, -74.4845],  // 39 Washington St
+
+        // Morris Street (runs E-W, north of center)
+        "grasshopper-off-the-green": [40.7977, -74.4797],  // 41-43 Morris St
+        "morristown-diner":          [40.7973, -74.4796],  // 73 Morris St
+        "morristown-bagel":          [40.7970, -74.4793],  // 121 Morris St
+        "the-morris-proper":         [40.7968, -74.4790],  // 100 Morris St
+        "end-of-elm":                [40.7975, -74.4783],  // 140 Morris St
+        "pierogies-house":           [40.7965, -74.4787],  // 145 Morris St
+        "jungle-juice":              [40.7963, -74.4785],  // 151 Morris St
+
+        // Elm Street (south of Morris)
+        "rinconcito-latino":  [40.7984, -74.4818],  // 94 Elm St
+        "saigon-subs":        [40.7983, -74.4816],  // 98 Elm St
+        "town-bar-and-kitchen": [40.7982, -74.4815], // 80 Elm St
+
+        // Speedwell Ave (runs N-S, east side)
+        "tatte":               [40.7991, -74.4763],  // 2 Speedwell Ave
+        "parkside-tavern":     [40.7990, -74.4761],  // 9 Speedwell Ave
+        "sushi-lounge":        [40.7989, -74.4762],  // 9 Speedwell Ave (same building)
+        "lins-palace":         [40.7983, -74.4752],  // 40 Speedwell Ave
+        "ethan-and-the-bean":  [40.7978, -74.4748],  // 70 Speedwell Ave
+        "chef-fredys-table":   [40.7975, -74.4746],  // 78 Speedwell Ave
+        "marjan":              [40.7973, -74.4745],  // 84 Speedwell Ave
+        "the-pastrami-house":  [40.7972, -74.4744],  // 82 Speedwell Ave
+        "arepas-paisas":       [40.7966, -74.4739],  // 116 Speedwell Ave
+
+        // The Green / Park Place area
+        "the-committed-pig":   [40.7980, -74.4825],  // 28 W Park Pl
+        "fig-and-lily-garden": [40.7984, -74.4826],  // 2 Cattano Ave
+        "kirshenbaum-baking-co": [40.7987, -74.4819], // 22 Schuyler Place
+        "azure-the-greek-mediterranean": [40.7982, -74.4822], // 3 Pine St
+        "town-bar-and-kitchen": [40.7982, -74.4817],  // 80 Elm St (near Green)
+
+        // Hotel restaurants
+        "rods-steak-and-seafood-grille": [40.7992, -74.4812], // 1 Convent Rd (Madison Hotel)
+        "blue-morel":          [40.7990, -74.4815],  // 2 Whippany Rd (Westin)
+
+        // Lafayette Ave / south
+        "el-encuentro":        [40.7938, -74.4792],  // 30 Lafayette Ave
+      };
+
+      interface Feature {
+        geometry: { coordinates: [number, number] };
         properties: {
-          slug: string;
-          name: string;
-          one_liner: string;
-          price: string;
-          neighborhood: string;
-          ownership: string;
-          byob: boolean;
-          cuisine: string[];
-          visit_status: string;
-          address: string;
+          slug: string; name: string; one_liner: string;
+          price: string; neighborhood: string; byob: boolean; cuisine: string[];
         };
       }
 
-      let allMarkers: { marker: any; feature: RestaurantFeature }[] = [];
-      let activeNeighborhood = 'all';
+      let allMarkerData: { marker: any; neighborhood: string }[] = [];
 
-      function makePin(feature: RestaurantFeature) {
-        const { name, slug, one_liner, price, byob, neighborhood, cuisine } = feature.properties;
-        const [lng, lat] = feature.geometry.coordinates;
+      function makeMarker(f: Feature) {
+        const { slug, name, one_liner, price, byob, neighborhood, cuisine } = f.properties;
 
-        // Custom SVG pin — rust circle with first letter
+        // Use accurate coords if available, fall back to GeoJSON
+        const coords = COORDS[slug]
+          ? COORDS[slug]
+          : [f.geometry.coordinates[1], f.geometry.coordinates[0]] as [number, number];
+
         const letter = name.charAt(0).toUpperCase();
         const icon = L.divIcon({
           className: '',
-          html: `<div class="me-pin" title="${name}"><span>${letter}</span></div>`,
-          iconSize: [32, 32],
-          iconAnchor: [16, 16],
-          popupAnchor: [0, -20],
+          html: `<div class="me-pin">${letter}</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+          popupAnchor: [0, -16],
         });
 
         const cuisineStr = cuisine.slice(0, 2).join(', ');
         const byobBadge = byob ? '<span class="me-popup-byob">BYOB</span>' : '';
-        const baseUrl = window.location.origin;
+        const origin = window.location.origin.includes('github.io')
+          ? 'https://morristowneats.com'
+          : window.location.origin;
 
-        const popupHtml = `
+        const popup = `
           <div class="me-popup">
             <p class="me-popup-name">${name}</p>
             <div class="me-popup-meta">
@@ -471,110 +477,90 @@ const grouped = neighborhoods.map(n => ({
               ${byobBadge}
             </div>
             ${one_liner ? `<p class="me-popup-liner">${one_liner}</p>` : ''}
-            <a class="me-popup-link" href="${baseUrl}/restaurants/${slug}">Read more →</a>
-          </div>
-        `;
+            <a class="me-popup-link" href="/restaurants/${slug}">Read more →</a>
+          </div>`;
 
-        const marker = L.marker([lat, lng], { icon })
-          .bindPopup(popupHtml, { maxWidth: 240, minWidth: 220 });
-
-        return { marker, feature };
+        const marker = L.marker(coords, { icon }).bindPopup(popup, { maxWidth: 230, minWidth: 210 });
+        return { marker, neighborhood };
       }
 
-      function renderMarkers(neighborhood: string) {
-        // Remove all current markers
-        allMarkers.forEach(({ marker }) => map.removeLayer(marker));
-
-        // Add filtered markers
-        allMarkers.forEach(({ marker, feature }) => {
-          if (neighborhood === 'all' || feature.properties.neighborhood === neighborhood) {
-            marker.addTo(map);
-          }
-        });
-
-        // Dim non-active neighborhood labels
-        document.querySelectorAll('.nbhd-label').forEach((el) => {
-          const slug = (el as HTMLElement).dataset.slug;
-          if (neighborhood === 'all' || slug === neighborhood) {
-            (el as HTMLElement).style.opacity = '1';
-          } else {
-            (el as HTMLElement).style.opacity = '0.2';
-          }
-        });
-      }
-
-      // Fetch GeoJSON and build markers
       fetch('/data/restaurants.geojson')
         .then(r => r.json())
-        .then((geojson) => {
-          geojson.features.forEach((feature: RestaurantFeature) => {
-            const item = makePin(feature);
-            item.marker.addTo(map);
-            allMarkers.push(item);
+        .then((geo) => {
+          geo.features.forEach((f: Feature) => {
+            const item = makeMarker(f);
+            clusterGroup.addLayer(item.marker);
+            allMarkerData.push(item);
           });
+          map.addLayer(clusterGroup);
         });
 
-      // ─── Filter buttons ───────────────────────────────────────
-      document.querySelectorAll('.filter-btn').forEach((btn) => {
+      // Filter
+      let activeNeighborhood = 'all';
+      document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           activeNeighborhood = (btn as HTMLElement).dataset.neighborhood || 'all';
-          renderMarkers(activeNeighborhood);
+
+          clusterGroup.clearLayers();
+          allMarkerData.forEach(({ marker, neighborhood }) => {
+            if (activeNeighborhood === 'all' || neighborhood === activeNeighborhood) {
+              clusterGroup.addLayer(marker);
+            }
+          });
         });
       });
-    }
+    });
   </script>
 
-  <!-- Inline styles for dynamically injected elements (Leaflet DivIcon) -->
   <style is:global>
-    /* Neighborhood labels — hand-written feel, ghosted on the map */
-    .nbhd-label {
-      font-family: 'Permanent Marker', cursive;
-      font-size: 0.85rem;
-      color: #1A1208;
-      opacity: 0.35;
-      white-space: nowrap;
-      pointer-events: none;
-      text-shadow: 1px 1px 0 #F0E6C8, -1px -1px 0 #F0E6C8;
-      transition: opacity 0.2s;
-      letter-spacing: 0.02em;
-    }
-
-    /* Restaurant pin — rust circle with letter */
+    /* Restaurant pin */
     .me-pin {
-      width: 30px;
-      height: 30px;
+      width: 28px; height: 28px;
       border-radius: 50%;
       background: #C4572A;
       border: 2px solid #1A1208;
-      box-shadow: 2px 2px 0 #1A1208;
+      box-shadow: 2px 2px 0 rgba(26,18,8,0.4);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
+      transition: transform 0.12s, box-shadow 0.12s;
       font-family: 'Permanent Marker', cursive;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #F0E6C8;
       line-height: 1;
     }
     .me-pin:hover {
-      transform: scale(1.2);
-      box-shadow: 3px 3px 0 #1A1208;
+      transform: scale(1.25);
+      box-shadow: 3px 3px 0 rgba(26,18,8,0.5);
     }
 
-    /* Remove default Leaflet marker shadow */
+    /* Cluster */
+    .me-cluster {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: #1A1208;
+      border: 2px solid #C4572A;
+      box-shadow: 2px 2px 0 rgba(26,18,8,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: #F0E6C8;
+      cursor: pointer;
+    }
+
+    /* Override MarkerCluster default styles */
+    .marker-cluster-small,
+    .marker-cluster-medium,
+    .marker-cluster-large { background: transparent !important; }
+    .marker-cluster-small div,
+    .marker-cluster-medium div,
+    .marker-cluster-large div { background: transparent !important; }
     .leaflet-marker-shadow { display: none !important; }
-
-    /* Attribution — small, muted */
-    .leaflet-control-attribution {
-      font-family: 'Space Mono', monospace !important;
-      font-size: 0.55rem !important;
-      background: rgba(240, 230, 200, 0.85) !important;
-      color: #7A6550 !important;
-    }
-    .leaflet-control-attribution a { color: #7A6550 !important; }
 
     /* Zoom control */
     .leaflet-control-zoom a {
@@ -589,6 +575,15 @@ const grouped = neighborhoods.map(n => ({
       color: #F0E6C8 !important;
     }
     .leaflet-bar { border: none !important; box-shadow: 3px 3px 0 #1A1208 !important; }
+
+    /* Attribution */
+    .leaflet-control-attribution {
+      font-family: 'Space Mono', monospace !important;
+      font-size: 0.5rem !important;
+      background: rgba(240,230,200,0.85) !important;
+      color: #7A6550 !important;
+    }
+    .leaflet-control-attribution a { color: #7A6550 !important; }
   </style>
 
 </BaseLayout>

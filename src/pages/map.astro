@@ -304,10 +304,10 @@ const grouped = neighborhoods.map(n => ({
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script is:inline src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
-  <script>
+  <script is:inline>
     // View toggle
     const btnMap = document.getElementById('btnMap');
     const btnList = document.getElementById('btnList');
@@ -317,17 +317,17 @@ const grouped = neighborhoods.map(n => ({
 
     btnMap?.addEventListener('click', () => {
       btnMap.classList.add('active'); btnList?.classList.remove('active');
-      mapView!.style.display = ''; listView!.style.display = 'none';
-      filterBar!.style.display = '';
+      if (mapView) mapView.style.display = ''; if (listView) listView.style.display = 'none';
+      if (filterBar) filterBar.style.display = '';
     });
     btnList?.addEventListener('click', () => {
       btnList.classList.add('active'); btnMap?.classList.remove('active');
-      listView!.style.display = ''; mapView!.style.display = 'none';
-      filterBar!.style.display = 'none';
+      if (listView) listView.style.display = ''; if (mapView) mapView.style.display = 'none';
+      if (filterBar) filterBar.style.display = 'none';
     });
 
     window.addEventListener('load', () => {
-      const L = (window as any).L;
+      const L = window.L;
       if (!L) return;
 
       const map = L.map('leaflet-map', {
@@ -351,13 +351,13 @@ const grouped = neighborhoods.map(n => ({
       tiles.addTo(map);
 
       // Very light warm tint — preserve contrast, just take the cold blue edge off
-      const tilePane = map.getPanes().tilePane as HTMLElement;
+      const tilePane = map.getPanes().tilePane;
       tilePane.style.filter = 'sepia(12%) saturate(90%) brightness(100%)';
 
       // Cluster group — custom styling
-      const clusterGroup = (L as any).markerClusterGroup({
+      const clusterGroup = L.markerClusterGroup({
         maxClusterRadius: 30,
-        iconCreateFunction: (cluster: any) => {
+        iconCreateFunction: (cluster) => {
           const count = cluster.getChildCount();
           return L.divIcon({
             className: '',
@@ -375,7 +375,7 @@ const grouped = neighborhoods.map(n => ({
       // 11 South St = 40.7958138, -74.4810113 (confirmed)
       // 90 South St = 40.7942663, -74.4783894 (confirmed)
       // All others placed from Morristown street grid knowledge
-      const COORDS: Record<string, [number, number]> = {
+      const COORDS = {
         // South Street corridor (runs SW-NE)
         "coniglios":               [40.7958, -74.4810],  // 11 South St — confirmed
         "the-address":             [40.7963, -74.4815],  // 20 South St
@@ -435,23 +435,15 @@ const grouped = neighborhoods.map(n => ({
         "el-encuentro":        [40.7938, -74.4792],  // 30 Lafayette Ave
       };
 
-      interface Feature {
-        geometry: { coordinates: [number, number] };
-        properties: {
-          slug: string; name: string; one_liner: string;
-          price: string; neighborhood: string; byob: boolean; cuisine: string[];
-        };
-      }
+      let allMarkerData = [];
 
-      let allMarkerData: { marker: any; neighborhood: string }[] = [];
-
-      function makeMarker(f: Feature) {
+      function makeMarker(f) {
         const { slug, name, one_liner, price, byob, neighborhood, cuisine } = f.properties;
 
         // Use accurate coords if available, fall back to GeoJSON
         const coords = COORDS[slug]
           ? COORDS[slug]
-          : [f.geometry.coordinates[1], f.geometry.coordinates[0]] as [number, number];
+          : [f.geometry.coordinates[1], f.geometry.coordinates[0]];
 
         const letter = name.charAt(0).toUpperCase();
         const icon = L.divIcon({
@@ -487,7 +479,7 @@ const grouped = neighborhoods.map(n => ({
       fetch('/data/restaurants.geojson')
         .then(r => r.json())
         .then((geo) => {
-          geo.features.forEach((f: Feature) => {
+          geo.features.forEach((f) => {
             const item = makeMarker(f);
             clusterGroup.addLayer(item.marker);
             allMarkerData.push(item);
@@ -501,7 +493,7 @@ const grouped = neighborhoods.map(n => ({
         btn.addEventListener('click', () => {
           document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          activeNeighborhood = (btn as HTMLElement).dataset.neighborhood || 'all';
+          activeNeighborhood = btn.dataset.neighborhood || 'all';
 
           clusterGroup.clearLayers();
           allMarkerData.forEach(({ marker, neighborhood }) => {

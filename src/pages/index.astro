@@ -1,6 +1,54 @@
 ---
 // Morristown Eats — Single Page Dashboard
-// No framework overhead. One page. Opens fast. Easy to maintain.
+// Cards generated from restaurants.geojson at build time.
+import fs from 'node:fs';
+import path from 'node:path';
+
+const geojsonPath = path.resolve('public/data/restaurants.geojson');
+const raw = JSON.parse(fs.readFileSync(geojsonPath, 'utf-8'));
+const restaurants = raw.features.map(f => f.properties);
+
+// Derive establishment type from cuisine array
+function getType(cuisines) {
+  const coffeeKeywords = ['coffee', 'cafe', 'cafe-coffee'];
+  const bakeryKeywords = ['bakery', 'bakery-pastry'];
+  const juiceKeywords = ['juice-smoothies'];
+  const iceCreamKeywords = ['ice-cream', 'dessert'];
+
+  if (cuisines.some(c => coffeeKeywords.includes(c)) && !cuisines.some(c => ['american','italian','mexican','japanese','persian','salvadoran','colombian','greek','greek-mediterranean','new-american','pizza','diner','deli-bagels','eastern-european','vietnamese','taiwanese','chinese','steakhouse','sushi','pub','bar','brunch','deli','jewish','latin-american','central-american','mediterranean'].includes(c))) return 'coffee';
+  if (cuisines.some(c => bakeryKeywords.includes(c)) && !cuisines.some(c => coffeeKeywords.includes(c) && c !== 'cafe-coffee')) return 'bakery';
+  if (cuisines.some(c => juiceKeywords.includes(c))) return 'juice';
+  if (cuisines.some(c => iceCreamKeywords.includes(c))) return 'ice-cream';
+  if (cuisines.some(c => c === 'bar') && cuisines.length <= 2) return 'bar';
+  return 'restaurant';
+}
+
+// Pretty-print cuisine list
+function formatCuisine(cuisines) {
+  return cuisines
+    .filter(c => !['cafe', 'cafe-coffee'].includes(c))
+    .map(c => c.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '))
+    .join(' / ');
+}
+
+// Neighborhood display names
+const neighborhoodNames = {
+  'south-street': 'South St',
+  'speedwell': 'Speedwell',
+  'the-green': 'The Green',
+  'morris-street': 'Morris St',
+  'washington-street': 'Washington',
+  'hq-plaza': 'HQ Plaza'
+};
+
+// Sort: visited first, then alphabetical
+const sorted = [...restaurants].sort((a, b) => {
+  const visitOrder = { visited: 0, 'fact-shell': 1, pending: 2 };
+  const va = visitOrder[a.visit_status] ?? 1;
+  const vb = visitOrder[b.visit_status] ?? 1;
+  if (va !== vb) return va - vb;
+  return a.name.localeCompare(b.name);
+});
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -483,272 +531,40 @@
     <button class="filter-btn" data-filter="bar" data-group="type">Bar</button>
     <button class="filter-btn" data-filter="byob" data-group="type">BYOB</button>
     <span style="width:1px;background:var(--rule);margin:0 0.25rem;align-self:stretch;display:inline-block;opacity:0.5"></span>
-    <button class="filter-btn" data-filter="south-st" data-group="neighborhood">South St</button>
+    <button class="filter-btn" data-filter="south-street" data-group="neighborhood">South St</button>
     <button class="filter-btn" data-filter="speedwell" data-group="neighborhood">Speedwell</button>
     <button class="filter-btn" data-filter="the-green" data-group="neighborhood">The Green</button>
+    <button class="filter-btn" data-filter="morris-street" data-group="neighborhood">Morris St</button>
+    <button class="filter-btn" data-filter="washington-street" data-group="neighborhood">Washington</button>
   </div>
 
   <div class="count-display" id="count-display">Showing all places</div>
 
   <div class="restaurant-grid" id="restaurant-grid">
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="true" data-neighborhood="speedwell">
-      <div class="card-top">
-        <div class="card-name">Chef Fredy's Table</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">The only Salvadoran kitchen in Morristown. No corkage fee. The liquor store next door is not a coincidence.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Salvadoran / Latin</div>
-      <div class="card-meta">78 Speedwell Ave &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Mon–Sun 11:30am–10pm</div>
-      <div class="card-tags">
-        <span class="tag byob">BYOB</span>
-        <span class="tag">Speedwell</span>
-        <span class="tag">OpenTable</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="true" data-neighborhood="south-st">
-      <div class="card-top">
-        <div class="card-name">South + Pine American Eatery</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">Chef Leia Gaccione. Five-time Iron Chef America challenger. Runs quietly. Worth it.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">American</div>
-      <div class="card-meta">90 South St &nbsp;·&nbsp; <strong>$$$</strong> &nbsp;·&nbsp; Dinner only</div>
-      <div class="card-tags">
-        <span class="tag byob">BYOB</span>
-        <span class="tag">South St</span>
-        <span class="tag">Patio</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="true" data-neighborhood="south-st">
-      <div class="card-top">
-        <div class="card-name">Coniglio's Old Fashioned</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">Won the 2023 NJ Pizza Bowl. About 200 pizzas out the door daily. That's the whole story.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Pizza</div>
-      <div class="card-meta">11 South St &nbsp;·&nbsp; <strong>$</strong> &nbsp;·&nbsp; Mon–Thu 7am–10pm, Fri 7am–11pm, Sat–Sun 8am–11pm</div>
-      <div class="card-tags">
-        <span class="tag byob">BYOB</span>
-        <span class="tag">South St</span>
-        <span class="tag">Counter Service</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="true" data-neighborhood="speedwell">
-      <div class="card-top">
-        <div class="card-name">Marjan Fine Persian Grill</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">Morristown's only Persian restaurant. Genuinely underappreciated. The kind of place that closes if not enough people know about it.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Persian</div>
-      <div class="card-meta">Speedwell Ave &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Call ahead</div>
-      <div class="card-tags">
-        <span class="tag byob">BYOB</span>
-        <span class="tag">Speedwell</span>
-        <span class="tag">Under the Radar</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="true" data-neighborhood="">
-      <div class="card-top">
-        <div class="card-name">Masago Japanese Cuisine</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">The answer to "where do you go for sushi." BYOB sushi in Morristown is a specific and popular category. Masago has earned the spot.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Japanese / Sushi</div>
-      <div class="card-meta">Morristown &nbsp;·&nbsp; <strong>$$</strong></div>
-      <div class="card-tags">
-        <span class="tag byob">BYOB</span>
-        <span class="tag">Sushi</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="false" data-neighborhood="">
-      <div class="card-top">
-        <div class="card-name">Ju-Ichi</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">Serious ramen. Independent. The kind of bowl you come back for.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Japanese / Ramen</div>
-      <div class="card-meta">Morristown &nbsp;·&nbsp; <strong>$$</strong></div>
-      <div class="card-tags">
-        <span class="tag">Ramen</span>
-        <span class="tag">Independent</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="true" data-neighborhood="south-st">
-      <div class="card-top">
-        <div class="card-name">The Address</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">Heated patio year-round. Greek-Mediterranean from an independent kitchen. Gluten-free options available.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Greek / Mediterranean</div>
-      <div class="card-meta">20 South St &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Mon–Sun from 11:30am</div>
-      <div class="card-tags">
-        <span class="tag byob">BYOB + Bar</span>
-        <span class="tag">South St</span>
-        <span class="tag">Patio</span>
-        <span class="tag">OpenTable</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="true" data-neighborhood="south-st">
-      <div class="card-top">
-        <div class="card-name">Pavesi Ristorante</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">Year-round heated tent patio. Closed Sunday and Monday. Italian from an independent kitchen on the South Street corridor.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Italian</div>
-      <div class="card-meta">50 South St &nbsp;·&nbsp; <strong>$$$</strong> &nbsp;·&nbsp; Tue–Sat 12pm–10pm</div>
-      <div class="card-tags">
-        <span class="tag byob">BYOB</span>
-        <span class="tag">South St</span>
-        <span class="tag">Patio</span>
-        <span class="tag">OpenTable</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="bakery" data-byob="false" data-neighborhood="south-st">
-      <div class="card-top">
-        <div class="card-name">Dän Bakery &amp; Café</div>
-        <div class="card-type type-bakery">Bakery</div>
-      </div>
-      <div class="card-note">Honey Cake. San Sebastian Cheesecake. Pistachio Roll. Central Asian pastry tradition on South Street. Worth the detour for the Honey Cake alone.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Bakery / Café</div>
-      <div class="card-meta">64 South St &nbsp;·&nbsp; <strong>$</strong> &nbsp;·&nbsp; Sun–Thu 9am–8pm, Fri–Sat 9am–9pm</div>
-      <div class="card-tags">
-        <span class="tag">South St</span>
-        <span class="tag">La Colombe Coffee</span>
-        <span class="tag">Kazakh Heritage</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="coffee" data-byob="false" data-neighborhood="speedwell">
-      <div class="card-top">
-        <div class="card-name">Ethan and the Bean</div>
-        <div class="card-type type-coffee">Coffee</div>
-      </div>
-      <div class="card-note">Mission-driven café employing intellectually and developmentally disabled young adults. Founded 2019. One of the more important businesses in town.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Café / Coffee</div>
-      <div class="card-meta">70 Speedwell Ave &nbsp;·&nbsp; <strong>$</strong> &nbsp;·&nbsp; Mon–Sat 8am–5pm, Sun 8am–3pm</div>
-      <div class="card-tags">
-        <span class="tag">Speedwell</span>
-        <span class="tag">Non-Profit</span>
-        <span class="tag">Community</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="false" data-neighborhood="speedwell">
-      <div class="card-top">
-        <div class="card-name">Morristown Bagel &amp; Deli</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">75 years. That number means something. A historical anchor for Morristown's food scene that most newer residents have never tried.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Deli / Bagels</div>
-      <div class="card-meta">Speedwell Ave area &nbsp;·&nbsp; <strong>$</strong> &nbsp;·&nbsp; Morning–early lunch</div>
-      <div class="card-tags">
-        <span class="tag">75+ Years</span>
-        <span class="tag">Breakfast</span>
-        <span class="tag">Deli</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="false" data-neighborhood="">
-      <div class="card-top">
-        <div class="card-name">Morristown Diner</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">A real diner. Not the nostalgia version — the actual thing. Morristown has one. This is it.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Diner / American</div>
-      <div class="card-meta">Morristown &nbsp;·&nbsp; <strong>$</strong></div>
-      <div class="card-tags">
-        <span class="tag">Classic</span>
-        <span class="tag">Breakfast</span>
-        <span class="tag">Independent</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="false" data-neighborhood="south-st">
-      <div class="card-top">
-        <div class="card-name">Orale Mexican Kitchen</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">Full liquor bar, weekend lunch, late bar hours on weekends. The better Mexican option on South Street.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Mexican</div>
-      <div class="card-meta">56 South St &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Mon–Thu 3pm–10pm, Fri–Sun 12pm–10pm</div>
-      <div class="card-tags">
-        <span class="tag">Full Bar</span>
-        <span class="tag">South St</span>
-        <span class="tag">OpenTable</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="false" data-neighborhood="speedwell">
-      <div class="card-top">
-        <div class="card-name">Sushi Lounge</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">DJs most nights. NJ Monthly "Best Sushi" recognition. The livelier sushi option — if that's what you're after.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Japanese / Sushi</div>
-      <div class="card-meta">9 Speedwell Ave &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Mon–Thu 11:30am–10pm, Fri–Sat to 11pm</div>
-      <div class="card-tags">
-        <span class="tag">Full Bar</span>
-        <span class="tag">Speedwell</span>
-        <span class="tag">OpenTable</span>
-        <span class="tag">NJ Monthly Pick</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="false" data-neighborhood="the-green">
-      <div class="card-top">
-        <div class="card-name">The Committed Pig</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">On the Green since 2009. Full bar. The local burger institution — locally-owned group across 3 NJ locations.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">American / Burgers</div>
-      <div class="card-meta">28 W Park Pl &nbsp;·&nbsp; <strong>$$</strong> &nbsp;·&nbsp; Mon–Fri 10am–9pm, Sat 9am–9pm</div>
-      <div class="card-tags">
-        <span class="tag">Full Bar</span>
-        <span class="tag">The Green</span>
-        <span class="tag">OpenTable</span>
-      </div>
-    </div>
-
-    <div class="restaurant-card" data-type="restaurant" data-byob="false" data-neighborhood="south-st">
-      <div class="card-top">
-        <div class="card-name">South Street Creamery &amp; Red Sea Café</div>
-        <div class="card-type">Restaurant</div>
-      </div>
-      <div class="card-note">Ice cream and Ethiopian café in the same space. Family-owned since 1999. One of the more singular concepts in Morristown.</div>
-      <div class="card-divider"></div>
-      <div class="card-cuisine">Ice Cream / Ethiopian</div>
-      <div class="card-meta">146–148 South St &nbsp;·&nbsp; <strong>$</strong></div>
-      <div class="card-tags">
-        <span class="tag">27 Years</span>
-        <span class="tag">Family-Owned</span>
-        <span class="tag">Unique</span>
-      </div>
-    </div>
-
+    {sorted.map(r => {
+      const type = getType(r.cuisine);
+      const typeClass = type === 'coffee' ? ' type-coffee' : type === 'bakery' ? ' type-bakery' : type === 'bar' ? ' type-bar' : '';
+      const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+      const hoodLabel = neighborhoodNames[r.neighborhood] || r.neighborhood;
+      return (
+        <div class="restaurant-card" data-type={type} data-byob={String(r.byob)} data-neighborhood={r.neighborhood}>
+          <div class="card-top">
+            <div class="card-name">{r.name}</div>
+            <div class={`card-type${typeClass}`}>{typeLabel}</div>
+          </div>
+          <div class="card-note">{r.one_liner}</div>
+          <div class="card-divider"></div>
+          <div class="card-cuisine">{formatCuisine(r.cuisine)}</div>
+          <div class="card-meta">{r.address} &nbsp;·&nbsp; <strong>{r.price}</strong></div>
+          <div class="card-tags">
+            {r.byob && <span class="tag byob">BYOB</span>}
+            <span class="tag">{hoodLabel}</span>
+            {r.ownership === 'independent' && <span class="tag">Independent</span>}
+            {r.ownership === 'local_group' && <span class="tag">Local Group</span>}
+          </div>
+        </div>
+      );
+    })}
   </div>
 
   <div class="section-label">Stay in the loop</div>

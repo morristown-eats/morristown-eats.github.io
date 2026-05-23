@@ -1,0 +1,671 @@
+---
+// Ask Morris — the roulette.
+// Pick your constraints. Morris picks the place.
+import fs from 'node:fs';
+import path from 'node:path';
+
+const geojsonPath = path.resolve('public/data/restaurants.geojson');
+const raw = JSON.parse(fs.readFileSync(geojsonPath, 'utf-8'));
+
+const eligible = raw.features
+  .map((f: any) => f.properties)
+  .filter((r: any) => r.ownership !== 'national_chain');
+
+const allCuisines = Array.from(
+  new Set(eligible.flatMap((r: any) => r.cuisine || []))
+).sort();
+
+const allNeighborhoods = Array.from(
+  new Set(eligible.map((r: any) => r.neighborhood).filter(Boolean))
+).sort();
+
+const neighborhoodLabel: Record<string, string> = {
+  'south-street': 'South St',
+  'speedwell': 'Speedwell',
+  'the-green': 'The Green',
+  'morris-street': 'Morris St',
+  'washington-street': 'Washington',
+  'hq-plaza': 'HQ Plaza',
+};
+
+function titleCase(s: string) {
+  return s.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+const payload = JSON.stringify(eligible.map((r: any) => ({
+  slug: r.slug,
+  name: r.name,
+  one_liner: r.one_liner,
+  price: r.price,
+  byob: !!r.byob,
+  neighborhood: r.neighborhood,
+  cuisine: r.cuisine || [],
+  address: r.address,
+})));
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ask Morris — Morristown Eats</title>
+  <meta name="description" content="Pick your constraints. Morris picks the place. A simple way to decide where to eat in Morristown." />
+  <meta property="og:title" content="Ask Morris — Morristown Eats" />
+  <meta property="og:description" content="Pick your constraints. Morris picks the place." />
+  <meta property="og:url" content="https://morristowneats.com/ask" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a1208;
+      --paper: #f5efe3;
+      --paper-dark: #ede5d0;
+      --terracotta: #b84c2b;
+      --sage: #6b7c5e;
+      --mustard: #c9972a;
+      --cream: #faf6ed;
+      --rule: #c8b99a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ── MASTHEAD (matches homepage) ── */
+    header {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 2.5rem 2rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: repeating-linear-gradient(90deg, var(--terracotta) 0, var(--terracotta) 8px, transparent 8px, transparent 12px);
+    }
+    .masthead-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .logo-lockup {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+      text-decoration: none;
+    }
+    .logo-lockup img {
+      height: 110px;
+      width: auto;
+      filter: invert(1);
+    }
+    .logo-lockup .logo-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--mustard);
+      text-transform: uppercase;
+    }
+    .masthead-right { text-align: right; }
+    .dateline {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--rule);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+    .tagline {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--paper-dark);
+      max-width: 280px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .breadcrumb {
+      margin-top: 1.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .breadcrumb a {
+      color: var(--terracotta);
+      text-decoration: none;
+      border-bottom: 1px dashed var(--terracotta);
+    }
+    .breadcrumb a:hover { color: var(--ink); border-color: var(--ink); }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      margin: 2.5rem 0 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    .lede {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 1.25rem;
+      line-height: 1.4;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+      max-width: 620px;
+    }
+
+    /* ── FILTERS PANEL ── */
+    .filters-panel {
+      background: var(--cream);
+      border: 1px solid var(--rule);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .filter-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-row-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--sage);
+      min-width: 110px;
+    }
+    .filter-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.85rem;
+      border: 1px solid var(--rule);
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--terracotta);
+      border-color: var(--terracotta);
+      color: white;
+    }
+    .cuisine-select {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.6rem;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    /* ── ASK BUTTON ── */
+    .ask-button {
+      width: 100%;
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      background: var(--terracotta);
+      color: white;
+      border: none;
+      padding: 1.1rem 1.6rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.02em;
+    }
+    .ask-button:hover:not(:disabled) { background: #9c3d22; }
+    .ask-button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ── STAGE / RESULT ── */
+    .stage {
+      background: var(--cream);
+      border: 1px solid var(--rule);
+      padding: 2.5rem 1.5rem;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .stage-empty {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      color: var(--sage);
+      text-align: center;
+      font-size: 1.1rem;
+    }
+    .roll {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      color: var(--ink);
+      text-align: center;
+      line-height: 1.2;
+    }
+    .result-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .result-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.2rem;
+      color: var(--ink);
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+    .result-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sage);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .result-hook {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--ink);
+      text-align: center;
+      max-width: 520px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.5;
+      padding: 1rem 0;
+      border-top: 1px dashed var(--rule);
+      border-bottom: 1px dashed var(--rule);
+    }
+    .result-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .pill-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.55rem 1.1rem;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid var(--ink);
+      background: transparent;
+      color: var(--ink);
+      transition: all 0.15s;
+      display: inline-block;
+    }
+    .pill-btn:hover { background: var(--ink); color: var(--paper); }
+    .pill-btn.primary {
+      background: var(--terracotta);
+      border-color: var(--terracotta);
+      color: white;
+    }
+    .pill-btn.primary:hover { background: #9c3d22; border-color: #9c3d22; color: white; }
+    .no-matches {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      color: var(--terracotta);
+      text-align: center;
+      font-size: 1.05rem;
+    }
+
+    /* ── NEWSLETTER ── */
+    .newsletter-block {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 2rem;
+      margin: 0 -1.5rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2rem;
+      align-items: center;
+    }
+    @media (max-width: 600px) { .newsletter-block { grid-template-columns: 1fr; } }
+    .newsletter-block h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      line-height: 1.2;
+      margin-bottom: 0.4rem;
+    }
+    .newsletter-block p {
+      font-size: 0.85rem;
+      opacity: 0.75;
+      max-width: 420px;
+    }
+    .newsletter-cta {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.85rem 1.6rem;
+      background: var(--terracotta);
+      color: white;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.15s;
+    }
+    .newsletter-cta:hover { background: #9c3d22; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 2.5rem 2rem 2rem;
+    }
+    .footer-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .footer-morris {
+      height: 60px;
+      width: auto;
+      filter: invert(1);
+      opacity: 0.6;
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .footer-links a {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--rule);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--paper); }
+    .footer-copy {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--rule);
+      opacity: 0.5;
+      margin-top: 1.5rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-top: 1.25rem;
+      border-top: 1px solid #2d2010;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .filter-row-label { width: 100%; margin-bottom: 0.25rem; }
+      .logo-lockup img { height: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="masthead-inner">
+    <a href="/" class="logo-lockup">
+      <img src="/images/morris-logo.png" alt="Morris the cat — Morristown Eats" />
+      <div class="logo-text">Morristown Eats</div>
+    </a>
+    <div class="masthead-right">
+      <div class="dateline">Morristown, NJ &nbsp;·&nbsp; Est. 2026</div>
+      <div class="tagline">A guide to what's actually worth eating.</div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="breadcrumb"><a href="/">← Back to the list</a></div>
+
+  <div class="section-label">Ask Morris</div>
+  <p class="lede">Pick your constraints. Morris picks the place.</p>
+
+  <div class="filters-panel" id="filters">
+    <div class="filter-row">
+      <span class="filter-row-label">Price</span>
+      <button class="filter-btn" data-group="price" data-value="$">$</button>
+      <button class="filter-btn" data-group="price" data-value="$$">$$</button>
+      <button class="filter-btn" data-group="price" data-value="$$$">$$$</button>
+    </div>
+    <div class="filter-row">
+      <span class="filter-row-label">BYOB</span>
+      <button class="filter-btn" data-group="byob" data-value="true">BYOB only</button>
+    </div>
+    <div class="filter-row">
+      <span class="filter-row-label">Neighborhood</span>
+      {allNeighborhoods.map(n => (
+        <button class="filter-btn" data-group="neighborhood" data-value={n}>
+          {neighborhoodLabel[n] || titleCase(n)}
+        </button>
+      ))}
+    </div>
+    <div class="filter-row">
+      <span class="filter-row-label">Cuisine</span>
+      <select class="cuisine-select" id="cuisine-select">
+        <option value="">Any</option>
+        {allCuisines.map(c => (
+          <option value={c}>{titleCase(c)}</option>
+        ))}
+      </select>
+    </div>
+  </div>
+
+  <button class="ask-button" id="ask-button" type="button">Ask Morris</button>
+
+  <div class="stage" id="stage" aria-live="polite">
+    <div class="stage-empty" id="stage-empty">Morris is dozing. Click the button.</div>
+  </div>
+
+  <div class="newsletter-block">
+    <div>
+      <h2>The Morristown Eats newsletter.</h2>
+      <p>One restaurant, one dish, one thing worth knowing each week. No sponsored content.</p>
+    </div>
+    <a class="newsletter-cta" href="https://morristowneats.substack.com" target="_blank" rel="noopener">Subscribe →</a>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <img src="/images/morris-logo.png" alt="Morris" class="footer-morris" />
+    <div class="footer-links">
+      <a href="/">The List</a>
+      <a href="/watches">Morris Watches</a>
+      <a href="https://morristowneats.substack.com" target="_blank" rel="noopener">Newsletter</a>
+      <a href="mailto:hello@morristowneats.com">Contact</a>
+    </div>
+  </div>
+  <div class="footer-copy">
+    Morristown Eats &nbsp;·&nbsp; Morristown, NJ &nbsp;·&nbsp; No pay-to-play &nbsp;·&nbsp; Visit before publish
+  </div>
+</footer>
+
+<script is:inline define:vars={{ payload }}>
+  const data = JSON.parse(payload);
+  const active = { price: null, byob: false, neighborhood: null, cuisine: '' };
+
+  document.querySelectorAll('#filters .filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.group;
+      const value = btn.dataset.value;
+      if (group === 'byob') {
+        active.byob = !active.byob;
+        btn.classList.toggle('active', active.byob);
+      } else {
+        if (active[group] === value) {
+          active[group] = null;
+          btn.classList.remove('active');
+        } else {
+          document.querySelectorAll(`#filters .filter-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+          active[group] = value;
+          btn.classList.add('active');
+        }
+      }
+    });
+  });
+
+  document.getElementById('cuisine-select').addEventListener('change', e => {
+    active.cuisine = e.target.value;
+  });
+
+  function filtered() {
+    return data.filter(r => {
+      if (active.price && r.price !== active.price) return false;
+      if (active.byob && !r.byob) return false;
+      if (active.neighborhood && r.neighborhood !== active.neighborhood) return false;
+      if (active.cuisine && !(r.cuisine || []).includes(active.cuisine)) return false;
+      return true;
+    });
+  }
+
+  const stage = document.getElementById('stage');
+  const button = document.getElementById('ask-button');
+  const hoodLabels = {
+    'south-street': 'South St',
+    'speedwell': 'Speedwell',
+    'the-green': 'The Green',
+    'morris-street': 'Morris St',
+    'washington-street': 'Washington',
+    'hq-plaza': 'HQ Plaza',
+  };
+
+  function renderResult(r) {
+    const hood = hoodLabels[r.neighborhood] || r.neighborhood;
+    const byob = r.byob ? ' · BYOB' : '';
+    const mapsURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.name + ' ' + (r.address || 'Morristown NJ'))}`;
+    stage.innerHTML = `
+      <div class="result-eyebrow">Morris says</div>
+      <div class="result-name">${r.name}</div>
+      <div class="result-meta">${hood} · ${r.price}${byob}</div>
+      ${r.one_liner ? `<div class="result-hook">"${r.one_liner}"</div>` : ''}
+      <div class="result-actions">
+        <a class="pill-btn" href="${mapsURL}" target="_blank" rel="noopener">Open in Maps</a>
+        <button class="pill-btn primary" id="again-btn" type="button">Ask again</button>
+      </div>
+    `;
+    document.getElementById('again-btn').addEventListener('click', spin);
+  }
+
+  function noMatch() {
+    stage.innerHTML = `<div class="no-matches">Nothing matches those constraints. Loosen up a little — Morris would.</div>`;
+  }
+
+  let spinning = false;
+
+  function spin() {
+    if (spinning) return;
+    const pool = filtered();
+    if (pool.length === 0) { noMatch(); return; }
+
+    spinning = true;
+    button.disabled = true;
+
+    const winner = pool[Math.floor(Math.random() * pool.length)];
+
+    stage.innerHTML = `<div class="roll" id="roll">${pool[0].name}</div>`;
+    const roll = document.getElementById('roll');
+
+    let frame = 0;
+    const totalFrames = 22;
+    const startInterval = 40;
+    const endInterval = 220;
+
+    function step() {
+      const t = frame / totalFrames;
+      const eased = 1 - Math.pow(1 - t, 2.2);
+      const interval = startInterval + (endInterval - startInterval) * eased;
+
+      if (frame >= totalFrames) {
+        roll.textContent = winner.name;
+        setTimeout(() => {
+          renderResult(winner);
+          spinning = false;
+          button.disabled = false;
+        }, 250);
+        return;
+      }
+
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      roll.textContent = pick.name;
+      frame++;
+      setTimeout(step, interval);
+    }
+    step();
+  }
+
+  button.addEventListener('click', spin);
+</script>
+
+</body>
+</html>

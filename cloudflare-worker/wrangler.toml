@@ -1,0 +1,17 @@
+name = "morristown-eats-tiers"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+# Bind the KV namespace as TIERS.
+# Replace the id below after running: wrangler kv:namespace create TIERS
+[[kv_namespaces]]
+binding = "TIERS"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Optional: bind a custom route once you set up DNS.
+# Until then, the worker is available at:
+#   https://morristown-eats-tiers.<your-subdomain>.workers.dev
+#
+# [[routes]]
+# pattern = "api.morristowneats.com/*"
+# zone_name = "morristowneats.com"

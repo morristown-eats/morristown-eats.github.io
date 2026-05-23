@@ -221,6 +221,61 @@ const sorted = [...restaurants].sort((a, b) => {
       line-height: 1.5;
     }
 
+    .play-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    @media (max-width: 600px) { .play-grid { grid-template-columns: 1fr; } }
+    .play-card {
+      background: var(--cream);
+      border: 1px solid var(--rule);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--ink);
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .play-card:hover { border-color: var(--terracotta); transform: translateY(-2px); }
+    .play-card-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+    }
+    .play-card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.75rem;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+    .play-card-hook {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--ink);
+      line-height: 1.4;
+      margin-bottom: 0.25rem;
+    }
+    .play-card-cta {
+      margin-top: auto;
+      align-self: flex-start;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.55rem 1.05rem;
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .play-card:hover .play-card-cta { background: var(--terracotta); }
+
     .filters {
       display: flex;
       flex-wrap: wrap;
@@ -519,6 +574,22 @@ const sorted = [...restaurants].sort((a, b) => {
       <h3>Independent-first</h3>
       <p>Morristown has real restaurants. This is where to find them.</p>
     </div>
+  </div>
+
+  <div class="section-label">Play</div>
+  <div class="play-grid">
+    <a class="play-card" href="/ask">
+      <div class="play-card-eyebrow">Decide tonight</div>
+      <div class="play-card-title">Ask Morris</div>
+      <div class="play-card-hook">"Pick your constraints. Morris picks the place."</div>
+      <span class="play-card-cta">Spin →</span>
+    </a>
+    <a class="play-card" href="/watches">
+      <div class="play-card-eyebrow">Rank the town</div>
+      <div class="play-card-title">Morris Watches</div>
+      <div class="play-card-hook">"Drag. Rank. Morris is watching."</div>
+      <span class="play-card-cta">Build your list →</span>
+    </a>
   </div>
 
   <div class="section-label">The List</div>

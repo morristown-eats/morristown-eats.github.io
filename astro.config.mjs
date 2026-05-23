@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://morristown-eats.github.io',
+  site: 'https://morristowneats.com',
   output: 'static',
 });

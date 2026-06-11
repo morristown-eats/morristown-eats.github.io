@@ -36,6 +36,21 @@ jobs:
       - name: Build Astro site
         run: npm run build
 
+      # morristowneats.com is served by Cloudflare Pages project "morristowneats"
+      # (direct upload), NOT GitHub Pages — discovered 2026-06-11. This step is
+      # the deploy that actually reaches the domain; GitHub Pages below is a
+      # mirror at morristown-eats.github.io.
+      - name: Deploy to Cloudflare Pages (the domain's real host)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: d17ca0bc458a3f3d320952a7b03d2fe7
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN secret not set — morristowneats.com was NOT updated (only the github.io mirror). Add the repo secret to fix."
+            exit 0
+          fi
+          npx wrangler pages deploy dist --project-name morristowneats --commit-dirty=true
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

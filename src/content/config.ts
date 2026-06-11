@@ -97,4 +97,23 @@ const restaurants = defineCollection({
   }),
 });
 
-export const collections = { restaurants, notes };
+const gossip = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),                                  // "morris hears things — june 10"
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    generated_at: z.string(),                           // full ISO w/ offset — drives the napping banner
+    weather_line: z.string(),                           // Morris's read on the day (model-written)
+    weather_short: z.string().optional(),               // deterministic NWS chip text (pipeline-written)
+    items: z.array(z.object({
+      text: z.string(),
+      sources: z.array(z.string().url()).min(1),
+    })).min(1).max(10),
+    closer: z.string().optional(),
+    thin_day: z.boolean().default(false),
+    sources_fetched: z.array(z.string()).default([]),
+    model: z.string().optional(),
+  }),
+});
+
+export const collections = { restaurants, notes, gossip };

@@ -11,6 +11,7 @@ interface Props {
   image?: string;
   image_alt?: string;
   visit_status?: string;
+  link?: boolean;
 }
 
 const {
@@ -25,7 +26,11 @@ const {
   image,
   image_alt,
   visit_status,
+  link = true,
 } = Astro.props;
+
+// Detail pages are archived — pages like /the-40 render the card unlinked.
+const Wrapper = link ? 'a' : 'div';
 
 const neighborhoodDisplay = neighborhood
   .split('-')
@@ -38,7 +43,7 @@ const cuisineDisplay = cuisine
 ---
 
 <article class="restaurant-card">
-  <a href={`/restaurants/${slug}`}>
+  <Wrapper href={link ? `/restaurants/${slug}` : undefined}>
     <div class="card-image">
       {image ? (
         <img
@@ -48,7 +53,7 @@ const cuisineDisplay = cuisine
           decoding="async"
         />
       ) : (
-        <div class="card-image-placeholder">{neighborhoodDisplay}</div>
+        <div class="card-image-placeholder"><span>{neighborhoodDisplay}</span></div>
       )}
     </div>
     <div class="card-body">
@@ -78,5 +83,5 @@ const cuisineDisplay = cuisine
         )}
       </div>
     </div>
-  </a>
+  </Wrapper>
 </article>

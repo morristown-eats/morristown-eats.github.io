@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GossipColumn from '../../components/GossipColumn.astro';
+
+export async function getStaticPaths() {
+  const columns = await getCollection('gossip');
+  return columns.map((col) => ({
+    params: { slug: col.slug },
+    props: { col },
+  }));
+}
+
+const { col } = Astro.props;
+---
+
+<BaseLayout title={col.data.title} description={col.data.weather_line}>
+  <section class="gossip-permalink">
+    <div class="container">
+      <a href="/" class="gossip-back">← today's column</a>
+      <GossipColumn slug={col.slug} variant="hero" {...col.data} />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .gossip-permalink {
+    padding: var(--space-12) 0 var(--space-20);
+  }
+  .gossip-back {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-rust);
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    margin-bottom: var(--space-8);
+  }
+</style>

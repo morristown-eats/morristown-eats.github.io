@@ -1,0 +1,173 @@
+---
+interface GossipItem {
+  text: string;
+  sources: string[];
+}
+
+interface Props {
+  slug: string;
+  date: string;           // YYYY-MM-DD
+  generated_at: string;   // full ISO with offset
+  weather_line: string;
+  weather_short?: string;
+  items: GossipItem[];
+  closer?: string;
+  variant?: 'hero' | 'feed';
+}
+
+const {
+  slug,
+  date,
+  generated_at,
+  weather_line,
+  weather_short,
+  items,
+  closer,
+  variant = 'feed',
+} = Astro.props;
+
+const dateObj = new Date(date + 'T12:00:00');
+const dateline = dateObj
+  .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  .toLowerCase();
+
+function sourceLabel(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return 'source';
+  }
+}
+---
+
+<article class={`gossip-column gossip-${variant}`} data-generated={generated_at}>
+  <header class="gossip-dateline">
+    {variant === 'feed' ? (
+      <a href={`/gossip/${slug}`} class="gossip-date-link">
+        <span class="gossip-date">{dateline}</span>
+      </a>
+    ) : (
+      <span class="gossip-date">{dateline}</span>
+    )}
+    {weather_short && <span class="gossip-weather-chip">{weather_short}</span>}
+  </header>
+
+  <p class="gossip-weather-line">{weather_line}</p>
+
+  <ul class="gossip-items" role="list">
+    {items.map((item) => (
+      <li class="gossip-item">
+        <p class="gossip-item-text">{item.text}</p>
+        <p class="gossip-item-sources">
+          {item.sources.map((src, i) => (
+            <>
+              {i > 0 && <span class="gossip-src-sep"> · </span>}
+              <a href={src} target="_blank" rel="noopener">{sourceLabel(src)}</a>
+            </>
+          ))}
+        </p>
+      </li>
+    ))}
+  </ul>
+
+  {closer && <p class="gossip-closer">{closer}</p>}
+</article>
+
+<style>
+  .gossip-column {
+    max-width: 680px;
+  }
+
+  .gossip-dateline {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-2);
+  }
+  .gossip-date {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+  .gossip-date-link {
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+  }
+  .gossip-date-link:hover .gossip-date {
+    color: var(--color-rust);
+  }
+  .gossip-weather-chip {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-olive);
+    border: 1.5px solid currentColor;
+    padding: 1px 6px;
+    transform: rotate(-1deg);
+  }
+
+  .gossip-weather-line {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--color-ink-muted);
+    margin-bottom: var(--space-6);
+  }
+
+  .gossip-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  .gossip-item-text {
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    line-height: 1.65;
+  }
+  .gossip-item-text::before {
+    content: '✦ ';
+    color: var(--color-rust);
+  }
+  .gossip-item-sources {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    margin-top: 2px;
+    padding-left: 1.1em;
+  }
+  .gossip-item-sources a {
+    color: var(--color-ink-muted);
+    text-decoration: underline;
+    text-decoration-style: dashed;
+  }
+  .gossip-item-sources a:hover { color: var(--color-rust); }
+  .gossip-src-sep { opacity: 0.5; }
+
+  .gossip-closer {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--color-ink-muted);
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px dashed var(--color-ink-muted);
+  }
+
+  /* Hero scale — today's column on the homepage / permalink pages */
+  .gossip-hero .gossip-date { font-size: var(--text-sm); }
+  .gossip-hero .gossip-weather-line { font-size: var(--text-lg); }
+  .gossip-hero .gossip-item-text { font-size: var(--text-lg); }
+
+  /* Feed scale — the archive stack */
+  .gossip-feed .gossip-date { font-size: var(--text-xs); }
+  .gossip-feed .gossip-weather-line { font-size: var(--text-sm); }
+  .gossip-feed .gossip-item-text { font-size: var(--text-base); }
+</style>

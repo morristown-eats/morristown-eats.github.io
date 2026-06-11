@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RestaurantCard from '../components/RestaurantCard.astro';
+import restaurants from '../../public/restaurants.json';
+
+const sorted = [...restaurants].sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<BaseLayout
+  title="The 40"
+  description="The Morristown restaurants this gossip column is about. Locations and facts, not reviews."
+>
+  <section class="the40-header">
+    <div class="container">
+      <span class="label">The Back Room</span>
+      <h1>the 40.</h1>
+      <p class="the40-sub">
+        the directory this column gossips about. facts and locations only —
+        morris does his talking on the front page.
+      </p>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="container">
+      <div class="restaurant-grid">
+        {sorted.map((r) => (
+          <RestaurantCard
+            name={r.name}
+            slug={r.slug}
+            cuisine={r.cuisine}
+            neighborhood={r.neighborhood}
+            price={r.price}
+            byob={r.byob}
+            ownership={r.ownership}
+            one_liner={r.one_liner}
+            visit_status={r.visit_status}
+            link={false}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .the40-header {
+    padding: var(--space-12) 0 var(--space-8);
+    border-bottom: var(--border-thick);
+  }
+  .the40-header .label {
+    display: block;
+    margin-bottom: var(--space-3);
+  }
+  .the40-header h1 {
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    margin-bottom: var(--space-3);
+  }
+  .the40-sub {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--color-ink-muted);
+    max-width: 480px;
+  }
+</style>

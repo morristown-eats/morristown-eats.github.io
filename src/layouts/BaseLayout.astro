@@ -9,13 +9,13 @@ interface Props {
 }
 
 const {
-  title = 'Morristown Eats',
-  description = 'The independent restaurant guide to Morristown, NJ. No ads. No pay-to-play. Visit first, write second.',
+  title = 'Morris Hears Things',
+  description = "The town's food gossip column. Morristown, NJ. Written by a cat, published every morning.",
   ogImage = '/images/og-default.jpg',
   canonicalURL = Astro.url.href,
 } = Astro.props;
 
-const fullTitle = title === 'Morristown Eats' ? title : `${title} — Morristown Eats`;
+const fullTitle = title === 'Morris Hears Things' ? title : `${title} — Morris Hears Things`;
 const currentPath = Astro.url.pathname;
 ---
 
@@ -34,7 +34,7 @@ const currentPath = Astro.url.pathname;
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonicalURL} />
   <meta property="og:image" content={ogImage} />
-  <meta property="og:site_name" content="Morristown Eats" />
+  <meta property="og:site_name" content="Morris Hears Things" />
 
   <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -50,9 +50,9 @@ const currentPath = Astro.url.pathname;
   <!-- Header -->
   <header class="site-header">
     <div class="container site-header-inner">
-      <a href="/" class="wordmark" aria-label="Morristown Eats — Home">
-        <span class="wordmark-city">Morristown</span>
-        <span class="wordmark-eats">Eats</span>
+      <a href="/" class="wordmark" aria-label="Morris Hears Things — Home">
+        <span class="wordmark-city">A Morristown Eats Production</span>
+        <span class="wordmark-eats">morris hears things</span>
       </a>
 
       <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
@@ -65,11 +65,11 @@ const currentPath = Astro.url.pathname;
 
       <nav aria-label="Main navigation">
         <ul class="site-nav" id="siteNav" role="list">
-          <li><a href="/restaurants" aria-current={currentPath.startsWith('/restaurants') ? 'page' : undefined}>Restaurants</a></li>
+          <li><a href="/" aria-current={currentPath === '/' ? 'page' : undefined}>Today</a></li>
+          <li><a href="/the-40" aria-current={currentPath === '/the-40' ? 'page' : undefined}>The 40</a></li>
           <li><a href="/notes" aria-current={currentPath.startsWith('/notes') ? 'page' : undefined}>Notes</a></li>
-          <li><a href="/map" aria-current={currentPath === '/map' ? 'page' : undefined}>Map</a></li>
-          <li><a href="/spill" aria-current={currentPath.startsWith('/spill') ? 'page' : undefined}>Spill</a></li>
-          <li><a href="/about" aria-current={currentPath === '/about' ? 'page' : undefined}>About</a></li>
+          <li><a href="/ask" aria-current={currentPath === '/ask' ? 'page' : undefined}>Ask Morris</a></li>
+          <li><a href="/watches" aria-current={currentPath === '/watches' ? 'page' : undefined}>Watches</a></li>
           <li>
             <a href="https://morristowneats.substack.com" target="_blank" rel="noopener" class="btn btn-dark btn-sm">
               Subscribe
@@ -89,23 +89,23 @@ const currentPath = Astro.url.pathname;
     <div class="container">
       <div class="footer-inner">
         <div class="footer-brand">
-          <a href="/" class="wordmark" aria-label="Morristown Eats">
-            <span class="wordmark-city">Morristown</span>
-            <span class="wordmark-eats">Eats</span>
+          <a href="/" class="wordmark" aria-label="Morris Hears Things">
+            <span class="wordmark-city">A Morristown Eats Production</span>
+            <span class="wordmark-eats">morris hears things</span>
           </a>
           <p class="footer-tagline">
-            The independent restaurant guide to Morristown, NJ.
-            No ads. No pay-to-play. Visit first, write second.
+            The town's food gossip column. Written by a cat.
+            Published every morning. Touched by no human.
           </p>
         </div>
         <nav aria-label="Footer navigation">
           <span class="footer-col-heading">Navigate</span>
           <ul class="footer-links" role="list">
-            <li><a href="/restaurants">Restaurants</a></li>
+            <li><a href="/">Today's Column</a></li>
+            <li><a href="/the-40">The 40</a></li>
             <li><a href="/notes">Field Notes</a></li>
-            <li><a href="/map">Map</a></li>
-            <li><a href="/spill">Spill the Tea</a></li>
-            <li><a href="/about">About</a></li>
+            <li><a href="/ask">Ask Morris</a></li>
+            <li><a href="/watches">Morris Watches</a></li>
           </ul>
         </nav>
         <nav aria-label="Footer links">

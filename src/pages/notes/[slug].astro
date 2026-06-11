@@ -203,7 +203,7 @@ const neighborhoodLabel = data.neighborhood
       <!-- Footer info line -->
       <div class="note-footer">
         <p class="note-footer-line">
-          <a href={`/restaurants/${data.establishmentSlug}`}>{data.establishment}</a> · {data.address} · {data.visitType} · {data.price}
+          {data.establishment} · {data.address} · {data.visitType} · {data.price}
         </p>
         {data.bestFor && (
           <p class="note-footer-line">Best for: {data.bestFor}</p>

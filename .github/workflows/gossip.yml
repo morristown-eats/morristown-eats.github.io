@@ -1,0 +1,123 @@
+# MORRIS HEARS THINGS — daily column pipeline.
+#
+# ingest (best-effort sources) -> Claude (Morris voice, validated, fail-closed)
+# -> build gate -> commit -> dispatch deploy.yml -> artifact audit trail.
+#
+# Secrets required (repo Settings -> Secrets and variables -> Actions):
+#   ANTHROPIC_API_KEY      console.anthropic.com
+#   GOOGLE_PLACES_API_KEY  GCP key restricted to Places API (New)
+#
+# A failed run = no commit, no deploy; the site shows the napping banner and
+# GitHub emails the owner. Re-run from the Actions tab (force=true regenerates
+# an existing day).
+
+name: Daily gossip
+
+on:
+  # STAGE 4: uncomment to go fully autonomous.
+  # 11:07 UTC = 7:07am EDT / 6:07am EST. Date stamping is always done in
+  # America/New_York inside the scripts, so posts never mis-date.
+  # schedule:
+  #   - cron: "7 11 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Overwrite today's post if it already exists"
+        default: "false"
+
+permissions:
+  contents: write   # commit the column + places state
+  actions: write    # dispatch deploy.yml
+
+concurrency:
+  group: gossip
+  cancel-in-progress: false
+
+jobs:
+  gossip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install anthropic SDK
+        run: pip install --quiet anthropic
+
+      - name: Idempotency guard
+        id: guard
+        env:
+          FORCE: ${{ inputs.force }}
+        run: |
+          TODAY=$(python3 -c "import datetime; from zoneinfo import ZoneInfo; print(datetime.datetime.now(ZoneInfo('America/New_York')).date().isoformat())")
+          echo "today=$TODAY" >> "$GITHUB_OUTPUT"
+          if [ -f "src/content/gossip/$TODAY.md" ] && [ "$FORCE" != "true" ]; then
+            echo "::notice::post for $TODAY already exists — clean no-op"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ingest sources
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+        run: python3 scripts/gossip/ingest.py
+
+      - name: Write column
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 scripts/gossip/write.py ${{ inputs.force == 'true' && '--force' || '' }}
+
+      - name: Setup Node
+        if: steps.guard.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Build gate
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Commit and push
+        id: commit
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          git config user.name "morris-bot"
+          git config user.email "morris-bot@users.noreply.github.com"
+          mkdir -p data/gossip
+          git add src/content/gossip data/gossip
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "gossip: ${{ steps.guard.outputs.today }}"
+            git pull --rebase origin main
+            git push origin main
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy site
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Bot pushes don't fire on:push workflows (GITHUB_TOKEN event rule),
+        # so dispatch the existing deploy workflow explicitly.
+        run: gh workflow run deploy.yml --ref main
+
+      - name: Upload audit trail
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gossip-${{ steps.guard.outputs.today }}
+          path: work/
+          retention-days: 30
+          if-no-files-found: ignore

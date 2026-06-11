@@ -4,3 +4,5 @@ dist/
 .astro/
 .claude/
 .codex/
+work/
+__pycache__/
